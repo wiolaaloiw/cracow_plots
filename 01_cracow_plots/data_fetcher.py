@@ -50,3 +50,26 @@ def fetch_przystanki_rodzaj_data():
     """
     return fetch_data(query)
     
+def fetch_piramida_wieku():
+    query = """
+    SELECT 
+        p.*, dz.nazwa
+    FROM piramida_wieku_krk p
+    INNER JOIN dzielnice dz ON p.id_dzielnica = dz.id_dzielnica
+    """
+    return fetch_data(query)
+
+def fetch_zabudowa_vs_zielen():
+    query = """
+    SELECT 
+    nazwa, 
+    # ROUND(powierzchnia_zabudowy, 2) AS powierzchnia_zabudowy,
+    # ROUND(powierzchnia_zielen,2) AS powierzchnia_zielen,
+    ROUND((powierzchnia_zabudowy / (powierzchnia_zabudowy + powierzchnia_zielen)) * 100, 2) AS procent_zabudowy,
+    ROUND((powierzchnia_zielen / (powierzchnia_zabudowy + powierzchnia_zielen)) * 100, 2) AS procent_zielen
+    FROM 
+    zestawienie_pow_zieleni_do_zabudowy
+""" 
+    return fetch_data(query)
+
+
