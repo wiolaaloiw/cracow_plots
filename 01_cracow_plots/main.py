@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from data_fetcher import fetch_zabudowa_data, fetch_przystanki_data, fetch_cena_data
+from data_fetcher import fetch_zabudowa_data, fetch_przystanki_data, fetch_cena_data, fetch_przystanki_rodzaj_data
 
 
 # typy zabudowy 
@@ -17,7 +17,7 @@ ax.bar_label(bars, padding=1, fontsize=9)
 ax.set_title("Ilość zabudowy w dzielnicy Czyżyny ", fontsize=14, fontweight="bold")
 ax.set_xlabel("Typ zabudowy")
 ax.set_ylabel("Ilość zabudowy")
-plt.show()
+# plt.show()
 
 # liczba przystankow
 df_przystanki = fetch_przystanki_data()
@@ -28,7 +28,7 @@ plt.title("Liczba przystanków w poszczególnych dzielnicach Krakowa", fontsize=
 plt.xlabel("Dzielnica")
 plt.ylabel("Liczba przystanków")
 plt.xticks(rotation=90)
-plt.show()
+# plt.show()
 
 # cena za m2
 df_cena = fetch_cena_data()
@@ -45,4 +45,22 @@ plt.title("Rozkład cen za m² w dzielnicach Krakowa", fontsize=16, fontweight='
 plt.xlabel("Dzielnica", fontsize=12)
 plt.ylabel("Cena za m² (PLN)", fontsize=12)
 plt.xticks(rotation=45, ha='right')
+# plt.show()
+
+# wykresy transport kolejowy 
+df_przystanki_rodzaj = fetch_przystanki_rodzaj_data()
+df = pd.DataFrame(df_przystanki_rodzaj)
+df_pivot = df.pivot( index = "nazwa", columns = "rodzaj", values="ilość przystanków")
+df_pivot.to_csv("przystanki_rodzaj.csv", index=True)
+# print(df_pivot.head())
+# print(df_pivot.head())
+# print(df_pivot.index)
+# print(df_pivot.columns)
+plt.figure(figsize=(10, 6))
+plt.plot(df_pivot.index, df_pivot['autobusowy'], label="Autobusowy", marker='o', linestyle='-', color='blue')
+plt.plot(df_pivot.index, df_pivot['tramwajowy'], label="Tramwajowy", marker='o', linestyle='-', color='green')
+plt.title("Liczba przystanków kolejowych w poszczególnych dzielnicach Krakowa", fontsize=14, fontweight="bold")
+plt.xlabel("Dzielnica")
+plt.xticks(rotation=45, ha='right')
+plt.ylabel("Liczba przystanków")
 plt.show()

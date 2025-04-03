@@ -42,3 +42,11 @@ def fetch_cena_data():
         dzielnice d ON rc.id_dzielnica = d.id_dzielnica
     """
     return fetch_data(query)
+
+def fetch_przystanki_rodzaj_data():
+    query = """
+    SELECT *
+    FROM dzielnice_przystanki_rodzaj
+    """
+    return fetch_data(query)
+    
