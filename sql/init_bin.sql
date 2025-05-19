@@ -1,0 +1,2449 @@
+-- create database potencjal_dzielnic_krakowa;
+use mydatabase;
+CREATE TABLE dzielnice (
+    id_dzielnica INT PRIMARY KEY auto_increment,         
+    nazwa VARCHAR(30) not null,                 
+    powierzchnia int not null,    
+    liczba_zameldowanych int not null);
+    
+
+INSERT INTO dzielnice (nazwa, powierzchnia, liczba_zameldowanych)
+VALUES
+('Stare Miasto', 5567646, 27283),
+('Grzegórzki', 5845232, 29525),
+('Prądnik Czerwony', 6437857, 44876),
+('Prądnik Biały', 23418679, 72966),
+('Krowodrza', 5619039, 28872),
+('Bronowice', 9559587, 24480),
+('Zwierzyniec', 28730964, 20176),
+('Dębniki', 46188703, 65203),
+('Łagiewniki-Borek Fałęcki', 5415081, 15219),
+('Swoszowice', 25604010, 29062), 
+('Podgórze Duchackie', 9540011, 53648),
+('Bieżanów-Prokocim', 18473911, 62583),
+('Podgórze', 25667082, 41058),
+('Czyżyny', 12256767, 34015),
+('Mistrzejowice', 5590035, 50208),
+('Bieńczyce', 3699023, 36540),
+('Wzgórza Krzesławickie', 23815455, 19925),
+('Nowa Huta', 65409916, 46095);
+
+
+    
+-- DELIMITER $$
+
+-- CREATE FUNCTION InttoRoman(num INT) RETURNS VARCHAR(20)
+-- DETERMINISTIC
+-- BEGIN
+--     DECLARE result VARCHAR(20);
+    
+--     CASE num
+--         WHEN 1 THEN SET result = 'I';
+--         WHEN 2 THEN SET result = 'II';
+--         WHEN 3 THEN SET result = 'III';
+--         WHEN 4 THEN SET result = 'IV';
+--         WHEN 5 THEN SET result = 'V';
+--         WHEN 6 THEN SET result = 'VI';
+--         WHEN 7 THEN SET result = 'VII';
+--         WHEN 8 THEN SET result = 'VIII';
+--         WHEN 9 THEN SET result = 'IX';
+--         WHEN 10 THEN SET result = 'X';
+--         WHEN 11 THEN SET result = 'XI';
+--         WHEN 12 THEN SET result = 'XII';
+--         WHEN 13 THEN SET result = 'XIII';
+--         WHEN 14 THEN SET result = 'XIV';
+--         WHEN 15 THEN SET result = 'XV';
+--         WHEN 16 THEN SET result = 'XVI';
+--         WHEN 17 THEN SET result = 'XVII';
+--         WHEN 18 THEN SET result = 'XVIII';
+--         ELSE SET result = NULL;
+--     END CASE;
+    
+--     RETURN result;
+-- END$$
+
+-- DELIMITER $$
+-- CREATE FUNCTION PelnaNazwa(numer INT, nazwa VARCHAR(30)) RETURNS VARCHAR(50)
+-- DETERMINISTIC
+-- BEGIN
+--     RETURN CONCAT('Dzielnica ', InttoRoman(numer), ' ', nazwa);
+-- END$$
+-- DELIMITER ;
+--     drop table if exists demografia;
+-- CREATE TABLE demografia (
+--     id_demografia INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+--     id_dzielnica INT NOT NULL,
+--     plec ENUM('k', 'm', 'r') NOT NULL,
+--     od INT NOT NULL,
+--     do INT NOT NULL,
+--     ilosc INT NOT NULL,
+--     FOREIGN KEY (id_dzielnica) REFERENCES dzielnice(id_dzielnica)
+-- );  
+
+drop table if exists dzialki;    
+create table dzialki (
+id_dzialki int not null primary key,
+id_dzielnica int not null,
+identyfikator varchar(30) not null,
+numer_dzialki varchar(30) not null,
+pow_dzialki_ha double not null,
+foreign key (id_dzielnica)  references dzielnice(id_dzielnica)
+);
+
+CREATE TABLE piramida_wieku_krk (
+
+id_piramida int primary key AUTO_INCREMENT,
+id_dzielnica int,
+k_0_2 INT,
+m_0_2 INT,
+k_3_6 INT,
+m_3_6 INT,
+k_7_14 INT,
+m_7_14 INT,
+k_15_18 INT,
+m_15_18 INT,
+k_19_24 INT,
+m_19_24 INT,
+k_25_34 INT,
+m_25_34 INT,
+k_35_44 INT,
+m_35_44 INT,
+k_45_59_64 INT,
+m_45_59_64 int,
+k_60_65_79 int, 
+m_60_65_79 int, 
+k_po_80 int, 
+m_po_80 int)
+
+drop table if exists piramida_wieku_krk;
+
+drop table if exists przystanki;
+create table przystanki
+(
+id_przystanek int primary key auto_increment,
+id_dzielnica int not null,
+nazwa varchar(100) not null, 
+linie varchar(150) not null,
+rodzaj	varchar(50) not null,
+dl_geograficzna double not null,
+szer_geograficzna double not null,
+foreign key (id_dzielnica) references dzielnice(id_dzielnica)
+);
+
+drop table if exists zabudowa;
+CREATE TABLE zabudowa (
+    id_budynek INT PRIMARY KEY AUTO_INCREMENT,
+    id_dzielnica INT NOT NULL,
+    numer_dzialki VARCHAR(20) NOT NULL,
+    typ_index VARCHAR(20) NOT NULL,
+    typ VARCHAR(255) NOT NULL,
+    bud_powierzchnia_ha DOUBLE NOT NULL,
+    FOREIGN KEY (numer_dzialki) REFERENCES dzialki(numer_dzialki)
+
+);
+
+drop table if exists zielen;
+CREATE TABLE zielen (
+id_zielen INT PRIMARY KEY AUTO_INCREMENT,
+id_dzielnica INT NOT NULL,
+typ VARCHAR (50) NOT NULL,
+powierzchnia_ha DOUBLE,
+FOREIGN KEY (id_dzielnica) REFERENCES dzielnice(id_dzielnica)
+);
+
+drop table if exists rejestr_cen;
+CREATE TABLE rejestr_cen (
+    id_rejestr_p INT AUTO_INCREMENT PRIMARY KEY, -- Unikalne ID (autoinkrementacja)
+    rok_zakupu INT NOT NULL,                     -- Rok zakupu
+    miesiac_zakupu INT NOT NULL,                 -- Miesiąc zakupu
+    rynek VARCHAR(50) NOT NULL,           -- Typ rynku (np. Rynek pierwotny)
+    sr_cena DECIMAL(15, 2) NOT NULL,             -- Średnia cena
+    sr_pow DECIMAL(10, 2) NOT NULL,              -- Średnia powierzchnia
+    sr_cena_m2 DECIMAL(10, 2) NOT NULL,          -- Średnia cena za m²
+    liczba_obiektow INT NOT NULL,                -- Liczba obiektów
+    id_dzielnica INT NOT NULL,
+    FOREIGN KEY (id_dzielnica) REFERENCES dzielnice(id_dzielnica)
+);
+drop table if exists dostepnosc_placowki;
+CREATE TABLE dostepnosc_placowki (
+	id_placowki INT AUTO_INCREMENT PRIMARY KEY,
+    nazwa VARCHAR(255) NOT NULL,                
+    rodzaj VARCHAR(255) NOT NULL,               
+    kod INT,                           
+    ulica VARCHAR(255),               
+    budynek VARCHAR(50),              
+    lokal VARCHAR(50),                          
+    data_powstania DATE,               
+    dl_geograficzna DECIMAL(20, 10) NOT NULL,   
+    szer_geograficzna DECIMAL(20, 10) NOT NULL, 
+    id_dzielnica INT NOT NULL,     
+    FOREIGN KEY (id_dzielnica) REFERENCES dzielnice(id_dzielnica)
+);
+-- DEMOGRAFIA
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(1,'r',25,34,2799);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(1,'k',35,44,2194);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(1,'m',35,44,2032);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(1,'r',35,44,4226);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(2,'r',25,34,3631);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(2,'k',35,44,2811);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(2,'m',35,44,2683);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(2,'r',35,44,5494);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(3,'r',25,34,4855);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(3,'k',35,44,3880);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(3,'m',35,44,3503);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(3,'r',35,44,7383);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(4,'r',25,34,9280);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(4,'k',35,44,7064);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(4,'m',35,44,6183);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(4,'r',35,44,13247);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(5,'r',25,34,3170);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(5,'k',35,44,2419);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(5,'m',35,44,2297);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(5,'r',35,44,4716);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(6,'r',25,34,2788);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(6,'k',35,44,2181);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(6,'m',35,44,1968);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(6,'r',35,44,4149);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(7,'r',25,34,1956);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(7,'k',35,44,1681);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(7,'m',35,44,1457);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(7,'r',35,44,3138);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(8,'r',25,34,7552);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(8,'k',35,44,6227);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(8,'m',35,44,5542);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(8,'r',35,44,11769);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(9,'r',25,34,1516);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(9,'k',35,44,1410);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(9,'m',35,44,1346);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(9,'r',35,44,2756);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(10,'r',25,34,3332);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(10,'k',35,44,2789);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(10,'m',35,44,2420);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(10,'r',35,44,5209);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(11,'r',25,34,5562);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(11,'k',35,44,5137);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(11,'m',35,44,4738);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(11,'r',35,44,9875);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(12,'r',25,34,7312);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(12,'k',35,44,5399);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(12,'m',35,44,5041);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(12,'r',35,44,10440);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(13,'r',25,34,6065);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(13,'k',35,44,4653);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(13,'m',35,44,4323);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(13,'r',35,44,8976);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(14,'r',25,34,4688);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(14,'k',35,44,3563);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(14,'m',35,44,3408);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(14,'r',35,44,6971);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(15,'r',25,34,5659);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(15,'k',35,44,3755);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(15,'m',35,44,3360);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(15,'r',35,44,7115);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(16,'r',25,34,4040);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(16,'k',35,44,2716);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(16,'m',35,44,2456);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(16,'r',35,44,5172);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(17,'r',25,34,2416);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(17,'k',35,44,1669);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(17,'m',35,44,1585);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(17,'r',35,44,3254);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(18,'r',25,34,5138);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(18,'k',35,44,3827);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(18,'m',35,44,3691);	insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(18,'r',35,44,7518);
+
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(1,'r',45,120,15328);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(2,'r',45,120,14178);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(3,'r',45,120,22885);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(4,'r',45,120,32510);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(5,'r',45,120,15427);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(6,'r',45,120,11775);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(7,'r',45,120,10330);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(8,'r',45,120,28249);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(9,'r',45,120,7176);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(10,'r',45,120,12179);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(11,'r',45,120,25527);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(12,'r',45,120,30708);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(13,'r',45,120,15463);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(14,'r',45,120,13453);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(15,'r',45,120,27028);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(16,'r',45,120,20554);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(17,'r',45,120,9600);
+insert into demografia(id_dzielnica,plec,od,do,ilosc)  values(18,'r',45,120,23969);
+
+
+
+-- PRZYSTANKI-- 
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wolnica','10, 13, 72, 8','tramwajowy',7424330.1966,5546296.9914);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Orzeszkowej','18, 22, 52, 62','tramwajowy',7423963.5592,5546582.2912);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Orzeszkowej','18, 22, 52, 62','tramwajowy',7423993.7708,5546591.3175);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stradom','10, 13, 72, 8','tramwajowy',7424262.2212,5546610.9834);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stradom','18, 22, 52, 62','tramwajowy',7424186.0282,5546683.0337);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wolnica','904','autobusowy',7424328.6228,5546287.002);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wolnica','904','autobusowy',7424330.0848,5546299.2178);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'św. Wawrzyńca','17, 19, 24, 3, 69','tramwajowy',7424882.0488,5546634.3959);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'św. Wawrzyńca','669','autobusowy',7424882.7333,5546621.9274);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'św. Wawrzyńca','17, 19, 24, 3, 69','tramwajowy',7424865.6634,5546666.2181);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Wawel','10, 13, 18, 72, 8','tramwajowy',7424068.5376,5547019.5336);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wolnica','10, 13, 72, 8','tramwajowy',7424331.9074,5546306.5339);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Muzeum Narodowe','124, 152, 424, 502, 601, 609, 611, 902','autobusowy',7423095.5417,5547586.52);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stefana Batorego','664','autobusowy',7423313.7601,5548426.3733);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stefana Batorego','664','autobusowy',7423360.9593,5548372.301);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'UJ / AST','124, 152, 424, 502, 601, 609, 611, 902','autobusowy',7423431.7484,5547675.029);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'UJ / AST','124, 152, 424, 502, 601, 609, 611, 902','autobusowy',7423501.1144,5547683.1585);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Bagatela','664','autobusowy',7423574.8407,5548056.6533);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Bagatela','124, 152, 424, 502, 601, 605, 609, 611, 669, 902','autobusowy',7423579.3494,5547976.2728);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Filharmonia','669','autobusowy',7423602.2652,5547560.1267);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Filharmonia','1, 13, 18, 69, 72, 8','tramwajowy',7423608.3754,5547546.6905);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Bagatela','124, 152, 424, 502, 601, 609, 611, 664, 669, 902','autobusowy',7423639.5702,5548066.408);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Filharmonia','605, 669','autobusowy',7423682.8809,5547543.5136);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wszystkich Świętych','669','autobusowy',7423930.465,5547534.3144);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wszystkich Świętych','605, 669','autobusowy',7423983.2322,5547538.459);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wszystkich Świętych','1, 13, 18, 69, 72, 8','tramwajowy',7423923.1107,5547535.8651);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'UJ / AST','1, 20','tramwajowy',7423512.3283,5547681.107);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stefana Batorego','13, 14, 24, 4, 64, 8','tramwajowy',7423357.5645,5548375.242);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stefana Batorego','13, 14, 24, 4, 64, 8','tramwajowy',7423315.6658,5548424.4549);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Bagatela','13, 18, 20, 69, 72, 8','tramwajowy',7423582.256,5547984.2407);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Bagatela','14, 18, 20, 24, 4, 64, 69, 72','tramwajowy',7423634.7816,5548062.0267);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Bagatela','13, 14, 24, 4, 64, 8','tramwajowy',7423578.8579,5548057.1521);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Filharmonia','1, 13, 18, 69, 72, 8','tramwajowy',7423663.2853,5547530.333);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Wawel','10, 13, 18, 72, 8','tramwajowy',7424054.6207,5547002.8225);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stradom','10, 13, 18, 72, 8','tramwajowy',7424179.2781,5546747.5376);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stradom','22, 52, 62','tramwajowy',7424239.0999,5546768.8272);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'UJ / AST','1, 20','tramwajowy',7423425.3968,5547671.5602);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Muzeum Narodowe','1, 20','tramwajowy',7423067.647,5547593.9293);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Miodowa','17, 19, 24, 3, 69','tramwajowy',7424674.6765,5546943.7776);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Starowiślna','184, 605, 610, 662, 669, 904','autobusowy',7424531.3265,5547261.2752);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Starowiślna','24, 3, 52, 62, 69','tramwajowy',7424458.9125,5547280.9855);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Starowiślna','1, 17, 19, 22','tramwajowy',7424531.3143,5547321.3452);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Starowiślna','24, 3, 52, 62, 69','tramwajowy',7424425.2742,5547328.1815);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Wszystkich Świętych','1, 13, 18, 69, 72, 8','tramwajowy',7423976.3207,5547535.8874);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Poczta Główna','1, 24, 3, 52, 62, 69','tramwajowy',7424286.5547,5547540.9436);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Poczta Główna','1, 10, 69','tramwajowy',7424233.0657,5547556.6071);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Poczta Główna','10, 24, 3, 52, 62','tramwajowy',7424275.5294,5547606.9541);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Słowackiego','10, 14, 20, 4, 52, 62, 64, 72, 75','tramwajowy',7424513.9172,5548138.8748);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Słowackiego','124, 152, 424, 502, 601, 605, 608, 609, 610, 611, 664, 669, 902, 904','autobusowy',7424426.9341,5548160.46);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Słowackiego','14, 20, 24, 4, 64, 69, 72, 75','tramwajowy',7424426.9341,5548160.46);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stary Kleparz','124, 152, 424, 601, 605, 609, 611, 664, 669, 902','autobusowy',7423978.6122,5548326.9997);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stary Kleparz','14, 18, 20, 24, 4, 64, 69, 72','tramwajowy',7424010.6159,5548326.7674);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stary Kleparz','124, 152, 424, 601, 608, 609, 611, 664, 669, 902','autobusowy',7424129.2265,5548329.1995);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stary Kleparz','608','autobusowy',7424032.6609,5548371.5068);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stary Kleparz','18, 75','tramwajowy',7424039.0655,5548373.7519);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Zachód','130','autobusowy',7424453.5505,5548432.7349);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Zachód','3, 69','tramwajowy',7424503.2188,5548496.9981);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Zachód','3, 69','tramwajowy',7424499.3578,5548497.3863);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Zachód','179, 304, 608, 609, 610, 669, 902, 904','autobusowy',7424489.2317,5548500.3103);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Tunel','17, 19, 5, 50','tramwajowy',7424664.2285,5548536.1093);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Tunel','17, 19, 5, 50','tramwajowy',7424663.7483,5548542.6793);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Zachód','105, 129, 132, 405','autobusowy',7424430.7948,5548580.6728);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Słowackiego','10, 24, 3, 52, 62','tramwajowy',7424467.5867,5548093.1414);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Słowackiego','3, 69','tramwajowy',7424482.4674,5548183.4812);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'św. Gertrudy','10, 13, 18, 72, 8','tramwajowy',7424161.3383,5547462.735);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'św. Gertrudy','13, 18, 72, 8','tramwajowy',7424172.3008,5547478.2646);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Starowiślna','1, 17, 19, 22','tramwajowy',7424535.126,5547317.398);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stary Kleparz','14, 20, 24, 4, 64, 69, 72, 75','tramwajowy',7424093.7144,5548334.4867);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Inwalidów','664','autobusowy',7423177.7383,5548627.4473);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Plac Inwalidów','13, 14, 24, 4, 64, 8','tramwajowy',7423185.5214,5548615.9889);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Pędzichów','608','autobusowy',7423947.2153,5548697.2109);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Pędzichów','18, 75','tramwajowy',7423939.9129,5548707.3265);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Pędzichów','18, 75','tramwajowy',7423942.6121,5548710.8478);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Pędzichów','608','autobusowy',7423942.6121,5548710.8478);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Politechnika','3, 69','tramwajowy',7424483.1296,5548828.779);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Politechnika','17, 19, 5, 50','tramwajowy',7424480.2279,5548856.519);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Politechnika','189, 192, 501, 511, 608, 669','autobusowy',7424456.7008,5548858.5199);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Politechnika','105, 129, 130, 132, 179, 304, 405, 610, 904','autobusowy',7424455.0473,5548863.1041);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Politechnika','105, 129, 130, 132, 179, 189, 192, 304, 405, 501, 511, 608, 610, 669, 904','autobusowy',7424485.0748,5548865.1273);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Politechnika','17, 19, 5, 50','tramwajowy',7424484.3731,5548866.1384);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Politechnika','3, 69','tramwajowy',7424483.7535,5548888.1728);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Muzeum Armii Krajowej (nż)','317','autobusowy',7424752.867,5548917.5292);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Nowy Kleparz','608','autobusowy',7423752.5666,5549106.0125);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Cmentarz Rakowicki Zachód (nż)','105, 129, 132, 139, 159, 169, 199, 405, 469, 608, 610','autobusowy',7424617.6873,5549363.9509);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Cmentarz Rakowicki Zachód (nż)','105, 129, 132, 139, 159, 169, 199, 405, 608, 610','autobusowy',7424677.371,5549433.5252);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stradom','610, 662','autobusowy',7424194.7592,5546677.4592);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Poczta Główna','669','autobusowy',7424223.1596,5547544.8446);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stradom','904','autobusowy',7424232.3947,5546796.0648);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Stradom','610, 662, 904','autobusowy',7424252.103,5546746.2838);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Poczta Główna','605, 610, 662, 904','autobusowy',7424282.3093,5547615.4236);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Poczta Główna','605, 610, 662, 669, 904','autobusowy',7424298.5221,5547556.6816);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Starowiślna','610, 662, 669, 904','autobusowy',7424456.6478,5547282.9085);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Starowiślna','184','autobusowy',7424539.06,5547322.1259);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Miodowa','669','autobusowy',7424678.5481,5546944.0568);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Muzeum Armii Krajowej (nż)','317','autobusowy',7424770.31,5548778.233);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Miodowa','669','autobusowy',7424724.4167,5546885.1215);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Wschód','125, 182, 192, 317, 482, 609, 902','autobusowy',7424785.0802,5548591.3636);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Wschód','189','autobusowy',7424785.0802,5548591.3636);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Dworzec Główny Wschód','189','autobusowy',7424785.0802,5548591.3636);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Uniwersytet Ekonomiczny','125, 182, 189, 482, 501, 511','autobusowy',7424943.0204,5548549.8769);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Słowackiego','124, 152, 424, 502, 601, 608, 609, 611, 662, 664, 669, 902','autobusowy',7424506.1137,5548138.9849);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Teatr Słowackiego','610, 662, 904','autobusowy',7424473.0814,5548086.7231);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'św. Wawrzyńca','669','autobusowy',7424870.0134,5546675.0562);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Miodowa','17, 19, 24, 3, 69','tramwajowy',7424730.3325,5546867.796);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Biskupa Prandoty','105, 129, 132, 139, 159, 169, 199, 307, 405, 469, 503, 608, 610','autobusowy',7424752.6091,5549626.6922);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (1,'Biskupa Prandoty','105, 129, 132, 139, 159, 169, 199, 307, 405, 503, 608, 610','autobusowy',7424844.3934,5549754.7741);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Hala Targowa','184, 605','autobusowy',7424743.0534,5547471.7633);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Hala Targowa','184, 605','autobusowy',7424761.5586,5547463.6049);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Lubicz','125, 608, 609, 669, 902','autobusowy',7424937.6097,5548215.3416);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Lubicz','124, 125, 152, 424, 601, 611, 662, 664','autobusowy',7424978.4471,5548196.5252);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Uniwersytet Ekonomiczny','182, 189, 482, 501, 511','autobusowy',7425063.216,5548487.0092);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Lubicz','124, 152, 424, 601, 611, 662, 664','autobusowy',7424911.1354,5548186.1232);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Lubicz','72','tramwajowy',7424944.2587,5548224.815);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Lubicz','10, 14, 20, 4, 52, 62, 64, 75','tramwajowy',7424978.4471,5548196.5252);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Lubicz','10, 14, 20, 4, 52, 62, 64, 72, 75','tramwajowy',7424905.9214,5548181.9693);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Uniwersytet Ekonomiczny','72','tramwajowy',7424991.6032,5548465.765);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Uniwersytet Ekonomiczny','72','tramwajowy',7425021.5755,5548545.4378);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Hala Targowa','1, 17, 19, 22','tramwajowy',7424737.0358,5547471.6254);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Hala Targowa','1, 17, 19, 22','tramwajowy',7424721.4878,5547476.1825);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie Opera','124, 152, 424, 502, 601, 611','autobusowy',7425372.9589,5548245.5143);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','182, 189, 482, 501, 511','autobusowy',7425383.4994,5548400.5474);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','184, 605','autobusowy',7425364.5199,5547358.2697);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','1, 17, 19, 22','tramwajowy',7425370.6737,5547342.499);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','17, 19, 5, 50','tramwajowy',7425453.5023,5548280.6555);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','20, 49, 50, 9','tramwajowy',7425455.0667,5547267.4592);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','605','autobusowy',7425455.4024,5547276.1312);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','184','autobusowy',7425479.3861,5548139.2423);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','662','autobusowy',7425491.6909,5548158.9829);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','14, 17, 19, 20, 49, 50, 62, 9','tramwajowy',7425493.3347,5548153.6205);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','662','autobusowy',7425494.0137,5548171.5207);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','14, 20, 62','tramwajowy',7425497.3679,5548165.5783);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','184, 662','autobusowy',7425478.2622,5547441.6716);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','125, 664','autobusowy',7425517.464,5548246.0587);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','10, 4, 52, 64, 75','tramwajowy',7425518.8096,5548255.2729);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','124, 152, 182, 184, 189, 424, 482, 501, 502, 511, 601, 611','autobusowy',7425523.8599,5548412.2737);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','125, 664','autobusowy',7425521.8803,5548254.674);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Mogilskie','10, 4, 49, 5, 52, 64, 75, 9','tramwajowy',7425534.8818,5548252.4906);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','14, 17, 19, 20, 49, 50, 62, 9','tramwajowy',7425479.1357,5547437.5435);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Cmentarz Rakowicki','124, 184, 424','autobusowy',7425455.3894,5549135.1767);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Cmentarz Rakowicki','124, 184, 424','autobusowy',7425478.2338,5549135.637);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Cmentarz Rakowicki','72','tramwajowy',7425370.7502,5549200.6542);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Cmentarz Rakowicki','72','tramwajowy',7425272.3645,5549055.8584);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Muzeum Fotografii','72','tramwajowy',7425142.5515,5548783.8);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Muzeum Fotografii','72','tramwajowy',7425165.5859,5548838.6529);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','662','autobusowy',7425553.022,5547379.4488);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Rondo Grzegórzeckie','1, 14, 22, 62','tramwajowy',7425553.6277,5547376.6594);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Brodowicza','152, 182, 189, 482, 601, 611','autobusowy',7425630.7319,5548621.2529);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Teatr Variété','1, 14, 22, 62','tramwajowy',7425703.867,5547479.0253);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Teatr Variété','1, 14, 22, 62','tramwajowy',7425715.013,5547482.319);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Nullo','662','autobusowy',7426015.0959,5547618.323);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Nullo','1, 14, 22, 62','tramwajowy',7426022.0758,5547605.2114);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Nullo','1, 14, 22, 62','tramwajowy',7426064.512,5547623.758);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Nullo','662','autobusowy',7426082.9488,5547605.3712);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Cystersów','10, 4, 49, 5, 52, 64, 75, 9','tramwajowy',7426200.7967,5548330.1398);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Fabryczna','1, 14, 22, 62','tramwajowy',7426264.677,5547650.3628);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Cystersów','10, 4, 49, 5, 52, 64, 75, 9','tramwajowy',7426298.8479,5548326.8968);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Fabryczna','125','autobusowy',7426296.3369,5547723.6785);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Fabryczna','125','autobusowy',7426296.3369,5547723.6785);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Fabryczna','1, 14, 22, 62','tramwajowy',7426343.1503,5547628.5913);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Cystersów','664','autobusowy',7426395.464,5548318.2245);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Ofiar Dąbia','125, 128, 662','autobusowy',7426632.5051,5547563.7674);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Ofiar Dąbia','125, 128','autobusowy',7426637.8206,5547486.6055);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Ofiar Dąbia','1, 14, 22, 62','tramwajowy',7426700.1239,5547554.4976);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Ofiar Dąbia','1, 14, 22, 62','tramwajowy',7426706.6516,5547550.0698);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Białucha','664','autobusowy',7426770.0769,5548416.6466);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Ofiar Dąbia','128, 662','autobusowy',7426768.2516,5547556.2343);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Dąbie','1, 14, 22, 62','tramwajowy',7426898.0195,5547671.9284);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Dąbie','128, 662','autobusowy',7426909.6877,5547692.5707);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Dąbie','1, 14, 22, 62','tramwajowy',7426910.4287,5547673.4274);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Dąbie','128, 662','autobusowy',7426963.3584,5547695.0637);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Brodowicza','152, 182, 189, 482, 601, 611','autobusowy',7425754.6152,5548746.2342);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Narzymskiego','152, 182, 189, 482, 502, 601, 611','autobusowy',7425990.3151,5549123.9643);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Narzymskiego','124, 152, 182, 184, 189, 424, 482, 502, 601, 611','autobusowy',7426009.2865,5549134.2696);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (2,'Łukasiewicza','124, 184, 424','autobusowy',7425945.6086,5549307.6844);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Fatimska (nż)','138, 182, 198, 511','autobusowy',7430395.8625,5551259.6457);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Jagiellońskie','123, 132, 139, 163, 193, 601','autobusowy',7430414.1736,5550654.3822);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Jagiellońskie','123, 132, 139, 163, 193, 601','autobusowy',7430427.9904,5550638.184);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Fatimska (nż)','138, 182, 511','autobusowy',7430534.4653,5551236.7069);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Arka','123, 132, 139, 163, 193, 501, 601','autobusowy',7430570.744,5550222.7444);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Arka','123, 132, 139, 163, 193, 501, 601','autobusowy',7430618.6979,5550150.9294);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Teatr Ludowy','122, 202, 212, 222, 232, 262, 422, 608, 701','autobusowy',7430721.8094,5549993.9702);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Nowolipki (nż)','138, 182','autobusowy',7430784.4621,5551255.7106);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Zajezdnia Bieńczyce','122, 138, 422, 608','autobusowy',7430789.5925,5551021.9328);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Zajezdnia Bieńczyce','122, 138, 422, 601, 608','autobusowy',7430795.5525,5551017.9622);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Teatr Ludowy','122, 202, 212, 222, 232, 262, 422, 608, 701','autobusowy',7430794.0889,5550014.9478);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Nowolipki (nż)','138','autobusowy',7430858.5212,5551210.924);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Hipokratesa','123, 132, 139, 163, 193, 501, 601','autobusowy',7430149.7044,5550893.8797);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Nad Dłubnią','122, 138, 422, 608','autobusowy',7431170.3813,5550788.0872);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Nad Dłubnią','122, 138, 422, 608','autobusowy',7431319.9111,5550795.6188);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Makuszyńskiego (nż)','122, 138, 422','autobusowy',7431455.9251,5550798.4334);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Wańkowicza','110, 122, 160, 202, 212, 222, 232, 262, 422, 701','autobusowy',7431728.503,5550522.1899);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','142, 172, 189, 442, 572, 608, 664','autobusowy',7430331.225,5549825.1808);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','122, 202, 212, 222, 232, 262, 422, 608, 701','autobusowy',7430492.3824,5549772.3586);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Cienista','110, 122, 160, 202, 212, 222, 232, 262, 422, 608, 701','autobusowy',7431212.0203,5550386.6499);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Cienista','110, 122, 160, 202, 212, 222, 232, 262, 422, 608, 701','autobusowy',7431241.5493,5550373.1439);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Makuszyńskiego (nż)','122, 138, 422','autobusowy',7431575.6108,5550811.5832);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Teatr Ludowy','1, 4, 5','tramwajowy',7430773.5868,5550018.1055);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Teatr Ludowy','1, 4, 5','tramwajowy',7430724.845,5549974.1305);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','14, 21, 52, 64, 75, 9','tramwajowy',7430330.7616,5549800.6032);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Cienista','1, 4, 5','tramwajowy',7431194.004,5550360.4072);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Cienista','1, 4, 5','tramwajowy',7431136.0814,5550308.8713);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','1, 4, 5','tramwajowy',7430462.6674,5549777.1945);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Na Lotnisku','123, 152, 172, 189, 501, 572, 608, 611','autobusowy',7429361.8709,5550469.5137);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Na Lotnisku','123, 501','autobusowy',7429430.6863,5550520.8869);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Na Lotnisku','152, 172, 189, 572, 608, 611','autobusowy',7429442.2762,5550417.5045);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Kupały','138','autobusowy',7429558.9606,5551385.5217);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Dunikowskiego','132, 139, 193, 601, 664','autobusowy',7429574.8614,5551174.8485);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Dunikowskiego','132, 139, 193, 601, 664','autobusowy',7429584.0879,5551131.0101);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Kościuszkowskie','142, 152, 442, 611','autobusowy',7429609.2725,5550087.149);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Dunikowskiego','123','autobusowy',7429643.2127,5550968.9353);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Kościuszkowskie','142, 152, 442, 611','autobusowy',7429630.5767,5550074.2986);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Dunikowskiego','123','autobusowy',7429659.1062,5551007.4371);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'DH Wanda','142, 172, 189, 442, 502, 572, 608, 664','autobusowy',7429897.0571,5550325.0884);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Mistrzejowice Nowe','138, 182, 198, 511','autobusowy',7429941.8835,5551462.248);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'DH Wanda','142, 172, 189, 442, 502, 572, 608, 664','autobusowy',7429917.9124,5550250.7301);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Hipokratesa','664','autobusowy',7429944.7371,5550986.6658);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Hipokratesa','664','autobusowy',7429959.2657,5550910.277);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Mistrzejowice Nowe','138, 182, 198, 511','autobusowy',7429979.0796,5551439.2902);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Szpital Rydygiera','163','autobusowy',7429995.1615,5551186.568);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Hipokratesa','163','autobusowy',7430008.9756,5550990.0511);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Hipokratesa','123, 132, 139, 193, 501, 601','autobusowy',7430078.0345,5550929.7458);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'DH Wanda','14, 21, 52, 64, 75, 9','tramwajowy',7429915.3736,5550275.4583);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Dunikowskiego','14, 21, 52, 64','tramwajowy',7429595.1408,5551138.8736);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Dunikowskiego','14, 21, 52, 64','tramwajowy',7429556.467,5551174.646);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'DH Wanda','14, 21, 52, 64, 75, 9','tramwajowy',7429916.5961,5550270.4366);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Hipokratesa','14, 21, 52, 64','tramwajowy',7429975.2695,5550891.8241);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Rondo Hipokratesa','14, 21, 52, 64, 75, 9','tramwajowy',7429972.5079,5550899.5358);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Strusia','123, 152, 172, 189, 502, 608, 611','autobusowy',7429077.3582,5550538.8009);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Strusia','123, 152, 172, 189, 502, 608, 611','autobusowy',7429113.9066,5550509.9502);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Kalinowe','138, 511','autobusowy',7429168.4149,5551058.525);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (16,'Os. Kalinowe','138, 511','autobusowy',7429186.7359,5551063.9553);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'PCK','149','autobusowy',7432320.5295,5550216.4335);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'PCK','149','autobusowy',7432327.1232,5550217.1287);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Petőfiego (nż)','122, 182, 422, 601, 608','autobusowy',7430976.8758,5551337.6515);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Władysława Jagiełły','122, 182, 422, 511, 601, 608','autobusowy',7431322.2684,5551430.0895);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Petőfiego (nż)','122, 182, 422, 601, 608','autobusowy',7430990.6475,5551340.1433);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wańkowicza','110, 138, 149, 160, 202, 212, 222, 232, 262, 701','autobusowy',7431849.1308,5550552.6869);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wańkowicza','149','autobusowy',7431827.6134,5550487.3311);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Jana Kazimierza','122, 182, 422, 511, 601, 608','autobusowy',7431830.3506,5551431.2589);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Jana Kazimierza','122, 182, 422, 511, 601, 608','autobusowy',7431814.9138,5551415.9938);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Krasnowolskiego (nż)','149','autobusowy',7431961.9538,5550341.2331);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wańkowicza','122, 138, 422','autobusowy',7431821.2041,5550669.3976);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Krasnowolskiego (nż)','149','autobusowy',7431951.2698,5550350.9356);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wańkowicza','1, 4, 5','tramwajowy',7431843.1713,5550528.7356);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wańkowicza','1, 4, 5','tramwajowy',7431846.548,5550524.1318);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Os. Na Stoku Szkoła','122, 142, 180, 422, 442, 601, 608, 701','autobusowy',7432483.4147,5551212.0611);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Os. Na Stoku Szkoła','122, 142, 180, 422, 442, 601, 608','autobusowy',7432466.568,5551266.3354);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Krzesławice Młyn (nż)','149','autobusowy',7432492.4366,5549801.4586);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Krzesławice Młyn (nż)','149','autobusowy',7432508.7511,5549732.953);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zajezdnia Nowa Huta','138, 142, 442, 601','autobusowy',7433135.8243,5550112.623);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zajezdnia Nowa Huta','138, 142, 442, 601','autobusowy',7433139.2962,5550212.8041);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Kombinat','22','tramwajowy',7433142.9826,5549717.7539);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zajezdnia Nowa Huta','22','tramwajowy',7433126.0196,5550129.8762);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zajezdnia Nowa Huta','','tramwajowy',7433129.37,5550134.5062);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Władysława Jagiełły','122, 182, 422, 511, 601, 608','autobusowy',7431424.5775,5551484.2833);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Os. Na Stoku','142, 180, 182, 442, 511, 608','autobusowy',7432046.0004,5551738.5314);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Leszka Białego','122, 182, 422, 511, 601, 608','autobusowy',7432085.332,5551505.8783);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Leszka Białego','122, 182, 422, 511, 601, 608','autobusowy',7432155.6791,5551511.9927);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Elektromontaż (nż)','138, 142, 442, 601','autobusowy',7432943.7265,5550615.596);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Elektromontaż (nż)','138, 142, 442, 601','autobusowy',7432929.3848,5550624.7861);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Elektromontaż (nż)','142, 442','autobusowy',7433199.5262,5550633.7503);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Elektromontaż (nż)','142, 442','autobusowy',7433199.4394,5550643.9852);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza SKA (nż)','242, 272','autobusowy',7433716.8313,5550697.8341);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza SKA (nż)','142, 242, 272, 442','autobusowy',7433716.8313,5550697.8341);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Darwina','110, 160','autobusowy',7432734.4712,5550878.1867);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Darwina','110, 160','autobusowy',7432696.1722,5550905.6995);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Cmentarz Grębałów','110, 160','autobusowy',7433472.3615,5550962.7232);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Cmentarz Grębałów','110, 160','autobusowy',7433466.478,5550967.2459);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Darwina','122, 149, 180, 202, 212, 222, 232, 262, 422, 608','autobusowy',7432637.8394,5551001.6536);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza SKA (nż)','142, 442','autobusowy',7433625.8299,5550977.0555);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Darwina','122, 149, 180, 202, 212, 222, 232, 262, 422, 608, 701','autobusowy',7432732.8881,5551048.0659);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Cmentarz Grębałów','242, 272','autobusowy',7433690.3395,5551031.4282);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Bugaj (nż)','110, 160, 242, 272','autobusowy',7433880.4247,5551073.0115);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Bugaj (nż)','110, 160, 242, 272','autobusowy',7433820.0244,5551096.0065);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Cmentarz Grębałów Południe (nż)','110, 160','autobusowy',7432971.0603,5550860.5309);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Mrozowa (nż)','142, 242, 272, 442','autobusowy',7433603.0128,5550200.2387);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Blokowa (nż)','142, 242, 272, 442','autobusowy',7433772.5949,5550317.6032);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Blokowa (nż)','142, 242, 272, 442','autobusowy',7433721.3763,5550383.3115);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Walcownia','142, 442','autobusowy',7434215.2743,5550707.4714);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Cmentarz Grębałów Południe (nż)','110, 160','autobusowy',7432958.5759,5550863.6909);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Mrozowa (nż)','142, 242, 272, 442','autobusowy',7433577.29,5550174.9738);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Agencja Kraków Wschód (nż)','142, 442','autobusowy',7434114.3524,5550555.5418);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wiadukty (nż)','138, 142, 442, 601','autobusowy',7432675.6199,5550649.0004);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Grodzki Urząd Pracy','4','tramwajowy',7432705.1938,5550553.6314);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Elektromontaż','','tramwajowy',7433063.0897,5550591.6299);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Elektromontaż','4','tramwajowy',7433027.445,5550597.0821);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'PH','','tramwajowy',7433055.4127,5550201.5066);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Jarzębiny','1, 5','tramwajowy',7432759.127,5551034.7209);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Grodzki Urząd Pracy','4','tramwajowy',7432712.4896,5550564.6632);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Węgrzynowice Centrum (nż)','110','autobusowy',7439545.2733,5553038.1814);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Węgrzynowice Centrum (nż)','110','autobusowy',7439626.0518,5553128.2577);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Trafo (nż)','110, 242, 272','autobusowy',7435619.9806,5551300.7182);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Trafo (nż)','110, 242, 272','autobusowy',7435623.8356,5551305.8999);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Orłowskiego (nż)','160','autobusowy',7436118.0248,5552796.3154);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Orłowskiego (nż)','160','autobusowy',7436217.8583,5552835.3897);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Łuczanowice','160, 242, 272','autobusowy',7436396.7718,5552733.0326);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Łuczanowice','160','autobusowy',7436398.8514,5552727.446);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Bystronia (nż)','160, 242, 272','autobusowy',7436683.0409,5553008.0548);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadowska (nż)','110, 242, 272','autobusowy',7436972.7777,5551523.9699);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Łuczanowice Skrzyżowanie','160, 242, 272','autobusowy',7437019.6622,5553169.8159);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadowska (nż)','110, 242, 272','autobusowy',7437046.0132,5551545.1312);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Łuczanowice Skrzyżowanie','160, 242, 272','autobusowy',7437091.6619,5553191.2144);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Osiedle (nż)','160, 242, 272','autobusowy',7437164.9733,5552655.3077);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Osiedle (nż)','160, 242, 272','autobusowy',7437177.374,5552578.298);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów','110, 242, 272','autobusowy',7437340.4184,5551602.5163);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów','110, 242, 272','autobusowy',7437388.3194,5551617.4165);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Szkoła','160, 242, 272','autobusowy',7437400.5686,5552021.6137);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Szkoła','160, 242, 272','autobusowy',7437466.4468,5551934.5235);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Glinik (nż)','110, 160','autobusowy',7437929.0871,5551140.1377);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Działki (nż)','110','autobusowy',7438423.3353,5551095.3763);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Działki (nż)','110','autobusowy',7438462.6065,5551094.0341);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Spławy','110','autobusowy',7438956.1567,5551175.4702);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Spławy','110','autobusowy',7438961.0813,5551168.0725);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Węgrzynowicka (nż)','110','autobusowy',7438998.8934,5551552.9576);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Węgrzynowicka (nż)','110','autobusowy',7439006.8572,5551561.0981);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Węgrzynowice Dół (nż)','110','autobusowy',7439153.2195,5552280.3414);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Węgrzynowice Dół (nż)','110','autobusowy',7439167.1581,5552310.661);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Barwna (nż)','110','autobusowy',7439320.8144,5552724.5976);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Węgrzynowice','110','autobusowy',7439455.1394,5553593.2631);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Os. Kolejowe','110, 160','autobusowy',7437670.1591,5551579.7496);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Barwna (nż)','110','autobusowy',7439318.5745,5552710.0513);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Glinik (nż)','110, 160','autobusowy',7437984.5347,5551096.001);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Bystronia (nż)','160, 242, 272','autobusowy',7436688.7771,5553015.2171);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wadów Os. Kolejowe','110, 160','autobusowy',7437669.0069,5551566.8598);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wzgórza Krzesławickie','122, 149, 180, 202, 212, 222, 232, 262, 422, 701','autobusowy',7433085.5361,5551389.6974);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Przychodnia','110, 160, 242, 272','autobusowy',7434432.5119,5551369.1064);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Przychodnia','110, 160, 242, 272','autobusowy',7434504.0186,5551388.2521);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Szkoła','110, 242, 272','autobusowy',7435154.4926,5551377.5378);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Szkoła','110, 160, 242, 272','autobusowy',7435152.3637,5551379.0097);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wzgórza Krzesławickie','608','autobusowy',7433076.6122,5551454.2155);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wzgórza Krzesławickie','608','autobusowy',7433022.2764,5551503.7294);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Lubocza Szkoła','160','autobusowy',7435157.7795,5551459.7016);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Wzgórza Krzesławickie','122, 149, 180, 202, 212, 222, 232, 262, 422','autobusowy',7433149.2883,5551532.1729);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Architektów','608','autobusowy',7432423.3264,5551626.9577);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Architektów','142, 180, 182, 442, 511, 701','autobusowy',7432366.5723,5551631.7916);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Architektów','142, 180, 182, 442, 511, 608','autobusowy',7432362.7335,5551679.0049);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Grębałów','180','autobusowy',7433698.0953,5551650.6989);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Grzegorza z Sanoka (nż)','160','autobusowy',7435087.4918,5551729.0795);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Grzegorza z Sanoka (nż)','160','autobusowy',7435077.8635,5551743.4347);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Kantorowicka (nż)','180','autobusowy',7433266.056,5551840.5087);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Folwarczna (nż)','180','autobusowy',7433933.8581,5552008.6309);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Jubileuszowa (nż)','122, 180, 202, 212, 222, 232, 262','autobusowy',7433397.5131,5552065.5696);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Jubileuszowa (nż)','122, 202, 212, 222, 232, 262','autobusowy',7433440.9626,5552107.2982);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Morcinka (nż)','180, 202, 212, 222, 232, 262','autobusowy',7433617.6744,5552365.2831);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Morcinka (nż)','122','autobusowy',7433616.2744,5552396.5581);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Kantorowice','122, 198, 422','autobusowy',7432906.111,5552418.7791);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Morcinka (nż)','122','autobusowy',7433559.5243,5552412.6143);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Kantorowice','122, 198, 422','autobusowy',7432878.9598,5552433.0249);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Morcinka (nż)','202, 212, 222, 232, 262','autobusowy',7433684.7402,5552448.2116);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Kantorowice','422','autobusowy',7432871.7455,5552479.5016);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Niebyła (nż)','422','autobusowy',7432828.2294,5552222.089);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Niebyła (nż)','422','autobusowy',7432845.9988,5552212.7441);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zesławice Ogródki Działkowe (nż)','122, 198, 422','autobusowy',7431954.0204,5552634.7215);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zesławice Ogródki Działkowe (nż)','122, 198, 422','autobusowy',7432020.5444,5552600.1693);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Szpital Okulistyczny','149, 422','autobusowy',7433023.4164,5551908.6187);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zakole','198, 422','autobusowy',7432273.1553,5552960.7079);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Łuczanowicka (nż)','160','autobusowy',7435356.8761,5552000.0108);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Łuczanowicka (nż)','160','autobusowy',7435466.0261,5552086.0117);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zesławice','122, 198, 422','autobusowy',7431586.8655,5552690.6921);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (17,'Zesławice','198','autobusowy',7431605.7561,5552674.2094);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Brogi','129, 159, 608','autobusowy',7425522.4537,5549802.018);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Białucha','10, 4, 49, 5, 52, 64, 75, 9','tramwajowy',7426778.1982,5548439.7845);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Białucha','664','autobusowy',7426867.9312,5548503.8544);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Białucha','10, 4, 49, 5, 52, 64, 75, 9','tramwajowy',7426835.768,5548466.1392);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'TAURON Arena Kraków Wieczysta','128','autobusowy',7427268.3388,5548805.4151);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'TAURON Arena Kraków Wieczysta','664','autobusowy',7427180.2935,5548827.7487);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'TAURON Arena Kraków Wieczysta','424, 664','autobusowy',7427270.9321,5548890.8117);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'TAURON Arena Kraków Wieczysta','124, 128','autobusowy',7427194.353,5548898.0831);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Meissnera','128, 424','autobusowy',7426963.1712,5549233.3968);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Meissnera','124, 128','autobusowy',7426949.5836,5549386.4256);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Ugorek','424','autobusowy',7427292.7969,5549487.8701);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Pilotów','124, 152, 182, 184, 189, 424, 482, 601, 611','autobusowy',7426297.3071,5549591.7154);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Ugorek','124','autobusowy',7427240.7974,5549585.8008);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Pszona','128, 424','autobusowy',7426753.1427,5549663.2077);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Pszona','124, 128','autobusowy',7426777.9855,5549663.4237);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Pilotów','124, 152, 182, 184, 189, 424, 482, 501, 502, 511, 601, 611','autobusowy',7426389.6586,5549696.121);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'TAURON Arena Kraków Wieczysta','10, 4, 5, 52, 64, 75, 9','tramwajowy',7427260.3769,5548899.0757);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'TAURON Arena Kraków Wieczysta','10, 4, 49, 5, 52, 64, 75, 9','tramwajowy',7427190.0533,5548824.1674);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'TAURON Arena Kraków Wieczysta','49','tramwajowy',7427356.0682,5548933.7053);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Spadochroniarzy','424','autobusowy',7427103.2369,5549803.0344);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Młyńskie','128, 424','autobusowy',7426594.5055,5549819.2282);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Młyńskie','124, 152, 182, 184, 189, 424, 482, 501, 502, 511, 601, 611','autobusowy',7426488.9556,5549863.3946);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Spadochroniarzy','124','autobusowy',7427061.6925,5549848.3194);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Brogi','129, 159, 608','autobusowy',7425642.6317,5549816.6975);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'UR al. 29 Listopada','105, 129, 132, 139, 159, 169, 199, 405, 469, 503, 608, 610','autobusowy',7424962.2929,5550081.1669);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Wileńska','129, 159, 608','autobusowy',7425128.0618,5550100.8683);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Bosaków','129, 159, 608','autobusowy',7425794.3922,5550095.4707);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'UR al. 29 Listopada','129, 159, 608','autobusowy',7425012.3661,5550129.8551);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'UR al. 29 Listopada','105, 132, 139, 169, 199, 405, 503, 610','autobusowy',7425051.3561,5550204.952);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Opolska Estakada','105, 132, 139, 169, 199, 307, 317, 405, 469, 503, 610','autobusowy',7425110.3383,5550383.8903);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Lublańska','138, 172','autobusowy',7425695.3037,5550413.1035);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Opolska Estakada','138, 172','autobusowy',7425257.7974,5550476.9372);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Opolska Estakada','138, 169, 172','autobusowy',7425122.5219,5550574.0525);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Opolska Estakada','105, 132, 139, 199, 307, 317, 405, 503, 610','autobusowy',7425261.2939,5550604.1476);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Dobrego Pasterza','105, 132, 139, 199, 317, 405, 503, 610','autobusowy',7425348.2021,5550769.4603);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Dobrego Pasterza','105, 132, 139, 199, 405, 610','autobusowy',7425459.6089,5550823.8594);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Dobrego Pasterza','317, 503','autobusowy',7425484.4561,5550927.4117);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Majora','105, 184, 199, 405, 610','autobusowy',7425834.8677,5550768.4694);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Lublańska','138, 172','autobusowy',7425830.6544,5550382.3012);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Powstańców','105, 184, 199, 405, 610','autobusowy',7425856.1002,5551277.4336);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Powstańców','105, 128, 184, 193, 199, 405, 610','autobusowy',7425892.5008,5551327.2094);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Bosaków','129, 159, 608','autobusowy',7425878.7102,5550198.5331);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Sudolska','105, 184, 199, 405, 610','autobusowy',7425911.8737,5551170.8704);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Majora','105, 184, 199, 405, 610','autobusowy',7425966.5643,5550768.9796);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Promienistych','132, 139, 184','autobusowy',7426065.9888,5550749.2486);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Powstańców Garaże','105, 128, 184, 193, 199, 405, 610','autobusowy',7426127.3418,5551490.8183);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Powstańców Garaże','105, 128, 184, 193, 199, 405, 610','autobusowy',7426182.0784,5551526.5487);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Promienistych','132, 139, 184','autobusowy',7426185.5346,5550787.1978);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Olsza II','138, 172','autobusowy',7426210.6454,5550371.7026);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Miechowity','129, 159, 608','autobusowy',7426209.4153,5550199.6311);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Miechowity','129, 159, 608','autobusowy',7426259.8779,5550220.4041);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Miechowity','128, 152, 182, 184, 189, 482, 501, 502, 511, 601, 611','autobusowy',7426325.3099,5550200.3686);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Olsza II','138, 172','autobusowy',7426331.692,5550424.5406);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Bitschana','132, 139, 184','autobusowy',7426358.3354,5550799.8315);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Miechowity','128, 152, 182, 184, 189, 482, 501, 502, 511, 601, 611','autobusowy',7426370.4177,5550175.3855);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Olsza II','159, 172, 608','autobusowy',7426424.4559,5550372.76);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Olsza II','129, 138','autobusowy',7426440.0578,5550497.4678);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Barei','132, 139, 184','autobusowy',7426507.4787,5550830.4831);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Młyńskie','128, 152, 182, 184, 189, 482, 601, 611','autobusowy',7426494.1831,5549993.6959);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Barei','128, 129, 138, 152, 182, 184, 189, 482, 601, 611','autobusowy',7426515.6328,5550752.058);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Prądnik Czerwony','105, 128, 184, 193, 199, 250, 260, 270, 405, 442, 610','autobusowy',7426581.9696,5551662.9817);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Barei','250, 260, 270','autobusowy',7426573.0757,5550895.8806);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Barei','128, 250, 260, 270, 442','autobusowy',7426575.0869,5550896.4092);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Reduta (nż)','250','autobusowy',7426621.3417,5551945.436);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Prądnik Czerwony','128, 250, 260, 270, 442','autobusowy',7426616.2574,5551590.872);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Prądnik Czerwony','105, 193','autobusowy',7426616.2574,5551590.872);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Prądnik Czerwony','105, 184, 193, 199, 250, 260, 270, 405, 610','autobusowy',7426642.7699,5551687.2869);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Reduta (nż)','250','autobusowy',7426654.6417,5551837.9657);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Strzelców','128, 250, 260, 270, 442','autobusowy',7426652.6264,5551227.1736);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Strzelców','250, 260, 270','autobusowy',7426653.2354,5551229.835);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Rondo Barei','129, 132, 138, 139, 152, 182, 189, 442, 482, 601, 611','autobusowy',7426659.8301,5550834.286);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Strzelców','250, 260, 270','autobusowy',7426700.4728,5551298.0445);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Strzelców','128, 250, 260, 270, 442','autobusowy',7426701.8613,5551300.139);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Akacjowa','424','autobusowy',7426779.6544,5549989.1109);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Akacjowa','124','autobusowy',7426825.3339,5549995.1599);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Bora-Komorowskiego','159, 172, 501, 502, 511, 608','autobusowy',7426896.7978,5550468.175);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Park Wodny','129, 132, 138, 139, 152, 182, 189, 442, 482, 601, 611','autobusowy',7427175.1397,5550935.0309);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Park Wodny','129, 132, 138, 139, 152, 182, 189, 442, 482, 601, 611','autobusowy',7427175.8698,5550946.5899);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Bora-Komorowskiego','159, 172, 501, 502, 511, 608','autobusowy',7427056.5317,5550461.5432);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Słoneckiego','129, 132, 138, 139, 152, 182, 189, 482, 601, 611','autobusowy',7426771.4772,5550876.0275);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Cmentarz Prądnik Czerwony','105, 193, 260, 270, 442','autobusowy',7427171.1242,5552178.7479);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Cmentarz Prądnik Czerwony','105, 193, 260, 270, 442','autobusowy',7427261.516,5552217.229);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Cmentarz Prądnik Czerwony','442','autobusowy',7427359.0832,5552288.8749);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Cmentarz Prądnik Czerwony Wschód (nż)','105, 193, 260, 270','autobusowy',7427520.1506,5552310.7149);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (3,'Cmentarz Prądnik Czerwony Wschód (nż)','105, 193, 260, 270','autobusowy',7427462.5555,5552295.0332);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna Wiadukt','18, 50, 69, 75','tramwajowy',7424744.0832,5551608.6806);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Żmujdzka','147','autobusowy',7424689.0198,5550544.8797);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Imbramowska','138, 169, 172, 469, 572','autobusowy',7424745.1594,5550689.0359);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górka Narodowa P+R','169, 307, 469, 503','autobusowy',7425914.1228,5552607.6226);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górka Narodowa P+R','18, 50, 69, 75','tramwajowy',7425781.8595,5552599.1133);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Jabłonna','169','autobusowy',7425317.254,5551146.3312);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Jabłonna','169, 469','autobusowy',7425321.911,5551151.8282);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Zawodzie','169, 469','autobusowy',7425097.8383,5551315.151);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Zawodzie','169','autobusowy',7425025.7688,5551370.8922);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bociana','669','autobusowy',7425168.0511,5551530.4195);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bociana','669','autobusowy',7425175.4329,5551531.2061);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ks. Meiera','128, 169, 193, 317, 469, 503','autobusowy',7425732.7446,5551778.2832);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Kuźnicy Kołłątajowskiej','18, 50, 69, 75','tramwajowy',7425309.9916,5551804.3109);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Kuźnicy Kołłątajowskiej','669','autobusowy',7425310.2357,5551826.8894);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Kuźnicy Kołłątajowskiej','669','autobusowy',7425316.9358,5551835.25);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Kuźnicy Kołłątajowskiej','18, 50, 69, 75','tramwajowy',7425315.5438,5551843.1676);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ks. Meiera','317, 669','autobusowy',7425732.374,5551839.137);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Natansona','317','autobusowy',7425001.1915,5551873.3789);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Natansona','317','autobusowy',7424965.3274,5551877.4422);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Kuźnicy Kołłątajowskiej','317','autobusowy',7425420.8719,5551873.7336);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ks. Meiera','128, 169, 193, 503, 669','autobusowy',7425771.7216,5551879.7492);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Kuźnicy Kołłątajowskiej','317','autobusowy',7425507.9284,5551887.2029);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Os. Gotyk','169, 469, 503','autobusowy',7425915.8792,5552042.9407);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Banacha','128, 193, 669','autobusowy',7425832.491,5552226.4211);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Papierni Prądnickich','18, 50, 69, 75','tramwajowy',7425407.0161,5552244.5816);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Banacha','169, 469, 503','autobusowy',7425873.406,5552235.8649);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Banacha','128, 193, 669','autobusowy',7425814.931,5552250.0255);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Papierni Prądnickich','128, 193, 669','autobusowy',7425435.6452,5552296.4652);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Banacha','169, 503','autobusowy',7425873.6563,5552295.1527);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Papierni Prądnickich','128, 193, 669','autobusowy',7425412.4109,5552323.4873);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bociana','18, 50, 69, 75','tramwajowy',7425193.6054,5551515.6004);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bociana','18, 50, 69, 75','tramwajowy',7425156.5414,5551526.1311);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Papierni Prądnickich','18, 50, 69, 75','tramwajowy',7425416.7352,5552274.481);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ojcowska Dworek','120','autobusowy',7420032.9957,5551521.4812);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ojcowska Dworek','120','autobusowy',7420044.3817,5551498.0609);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ojcowska Wągroda','120','autobusowy',7420098.3632,5551820.1933);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ojcowska Wągroda','120','autobusowy',7420116.8973,5551896.7855);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ojcowska','120','autobusowy',7420166.5308,5552225.3245);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Ojcowska','120','autobusowy',7420181.377,5552246.7951);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Jasnogórska (nż)','200, 210, 230, 310, 910','autobusowy',7420597.5252,5552024.8927);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Jasnogórska (nż)','200, 210, 230, 310, 910','autobusowy',7420607.0491,5551933.8654);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Rondo Ofiar Katynia','120, 238, 248, 258, 268, 278, 288, 948','autobusowy',7420627.3184,5550759.5039);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Jasnogórska (nż)','501','autobusowy',7420713.0235,5551895.1365);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Rondo Ofiar Katynia','200, 210, 230, 310, 501, 511, 611, 910','autobusowy',7420736.6842,5550812.7237);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Stawowa','200, 210, 230, 310, 501, 910','autobusowy',7420766.7642,5551581.5234);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Stawowa','168, 200, 210, 230, 310, 501, 511, 611, 910','autobusowy',7420775.4465,5551443.1195);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Radzikowskiego Osiedle','140','autobusowy',7420853.4514,5550607.0849);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Stawowa','511, 611','autobusowy',7420813.2589,5551454.5733);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Rondo Ofiar Katynia','168, 172, 173, 572','autobusowy',7420768.7707,5550722.4748);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Piaskowa (nż)','501','autobusowy',7421138.789,5551584.5855);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Czerwieńskiego','140','autobusowy',7421456.5182,5550337.5476);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Azory','130, 138, 140, 168, 173, 494, 904','autobusowy',7421923.9821,5550640.3979);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Radzikowskiego','140, 904','autobusowy',7421929.9787,5550257.0805);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Radzikowskiego','140, 494, 904','autobusowy',7421929.9787,5550257.0805);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Azory','168','autobusowy',7421942.8914,5550646.24);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Różyckiego','130, 138, 168, 494, 904','autobusowy',7422094.7033,5550818.3418);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Chabrowa','120, 220, 240, 420','autobusowy',7422164.9241,5551953.882);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Chabrowa','120, 220, 240, 420','autobusowy',7422197.8938,5551859.2907);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Różyckiego','130, 138, 168, 904','autobusowy',7422284.0506,5550766.9723);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pękowicka','290','autobusowy',7422345.4043,5552171.5157);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Makowskiego','130, 138, 168, 494, 904','autobusowy',7422437.9091,5550740.8202);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Makowskiego','130','autobusowy',7422456.6131,5550727.6447);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Stachiewicza','130, 144, 194, 494','autobusowy',7422452.0439,5550437.3692);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Skrajna (nż)','120, 220, 240, 420','autobusowy',7422524.3571,5551273.1948);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Makowskiego','138, 144, 168, 194, 904','autobusowy',7422525.3735,5550726.2026);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Makowskiego','144, 194','autobusowy',7422527.9345,5550730.0589);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Skrajna (nż)','120, 220, 240, 420','autobusowy',7422595.192,5551247.4726);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Jordanowska (nż)','120, 220, 240, 420','autobusowy',7422334.8171,5551615.4577);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Jordanowska (nż)','120, 220, 240, 420','autobusowy',7422366.9665,5551533.0049);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Poziomkowa','120, 220, 240, 290, 420','autobusowy',7421858.3731,5552501.5549);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Starego Wiarusa','120, 220, 240, 290, 420','autobusowy',7421984.1685,5552286.7977);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Starego Wiarusa','120, 220, 240, 420','autobusowy',7422062.5805,5552134.1408);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Starego Wiarusa','290','autobusowy',7422032.7926,5552206.2156);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Conrada','140, 168, 172, 173, 572','autobusowy',7421293.5585,5550854.4419);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Conrada','172, 173, 572','autobusowy',7421174.1931,5550855.5336);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Gnieźnieńska (nż)','140','autobusowy',7421707.168,5550282.5877);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Łobzów SKA','140','autobusowy',7422442.8274,5550137.5944);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Chełmońskiego Osiedle','168, 501','autobusowy',7421475.4197,5551190.3895);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Chełmońskiego Pętla','168','autobusowy',7421107.9954,5551408.6088);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Chełmońskiego Pętla','501, 511, 611','autobusowy',7421107.9954,5551408.6088);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Mehoffera','172, 572','autobusowy',7422273.2787,5550921.9781);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Mehoffera','172, 572','autobusowy',7422193.2719,5550952.0653);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Łobzów SKA','140','autobusowy',7422348.5063,5550148.9754);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Fiszera','140','autobusowy',7421055.7832,5550509.4251);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Poziomkowa','120, 220, 240, 290, 420','autobusowy',7421790.1969,5552590.2119);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Białoprądnicka','669','autobusowy',7423914.7827,5551493.6099);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pleszowska','172','autobusowy',7423907.0592,5551147.2026);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Białoprądnicka','669','autobusowy',7423925.8006,5551498.4589);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pielęgniarek','147, 513','autobusowy',7423915.9116,5550245.6879);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Szpital Jana Pawła II','138, 267, 287, 513','autobusowy',7424010.9213,5550851.6026);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Lekarska','147, 513','autobusowy',7424024.1387,5550578.0948);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Lekarska','147','autobusowy',7424038.3161,5550588.5724);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Lekarska','513','autobusowy',7424039.7842,5550621.3678);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Szpital Jana Pawła II','147, 513','autobusowy',7424050.4779,5550789.6351);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górnickiego','669','autobusowy',7424240.792,5551633.1465);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górnickiego','669','autobusowy',7424251.5695,5551636.2197);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bobrzeckiej (nż)','147','autobusowy',7424248.9907,5550808.0649);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Reja','147','autobusowy',7424306.934,5550351.1553);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Mackiewicza','138, 172, 267, 287, 572','autobusowy',7424390.613,5550999.1742);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Mackiewicza','138, 169, 172, 469, 572','autobusowy',7424438.6854,5550921.7379);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Mackiewicza','169, 267, 287','autobusowy',7424442.2818,5551044.4973);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Clepardia','169, 267, 287, 469','autobusowy',7424507.3735,5551330.802);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Clepardia','169, 267, 287','autobusowy',7424536.2684,5551420.833);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna Wiadukt','169, 669','autobusowy',7424705.6304,5551622.1263);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Szpital Jana Pawła II','138, 267, 287','autobusowy',7424070.0017,5550859.106);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna Wiadukt','18, 50, 69, 75','tramwajowy',7424697.8294,5551627.1309);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górnickiego','18, 50, 69, 75','tramwajowy',7424262.103,5551632.177);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górnickiego','18, 50, 69, 75','tramwajowy',7424305.3295,5551652.7003);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Wyki','120, 144, 220, 240, 290, 420, 904','autobusowy',7422881.0406,5551283.2756);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Wyki','120, 144, 220, 240, 290, 420, 904','autobusowy',7422888.6561,5551290.2852);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Władysława Łokietka','120, 420','autobusowy',7422918.9845,5550574.6734);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Batalionu Skała  AK','120, 144, 220, 240, 290, 420, 904','autobusowy',7422957.9415,5550859.1134);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Batalionu Skała AK','120, 138, 144, 168, 194, 420, 904','autobusowy',7422960.8309,5550751.7233);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Vetulaniego','144, 290, 904','autobusowy',7423012.4501,5551428.4426);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Vetulaniego','144, 290, 904','autobusowy',7423014.8229,5551434.193);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowoderskich Zuchów','138, 168, 194, 220, 240, 290','autobusowy',7423107.7711,5550836.4871);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowoderskich Zuchów','138, 168, 194, 220, 240, 290','autobusowy',7423164.9256,5550859.2484);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Wybickiego','102, 120, 140, 420','autobusowy',7423165.7867,5550291.792);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Opolska Kładka','172, 572','autobusowy',7423232.3698,5551125.037);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Opolska Kładka','172, 572','autobusowy',7423234.6331,5551158.0433);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pachońskiego P+R','144, 290, 904','autobusowy',7423297.6333,5551508.5515);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pachońskiego P+R','290, 513','autobusowy',7423362.4014,5551553.7875);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pachońskiego P+R','207, 227, 297, 513, 669, 937','autobusowy',7423365.363,5551475.8757);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pachońskiego P+R','144, 207, 227, 297, 669, 904, 937','autobusowy',7423415.4162,5551522.9921);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Sosabowskiego','172, 572','autobusowy',7423467.1571,5551148.3674);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Urzędy Skarbowe','102','autobusowy',7423468.3961,5550360.2029);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Urzędy Skarbowe','102','autobusowy',7423476.7095,5550415.9272);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','138','autobusowy',7423488.4807,5550803.213);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','102, 168, 194, 207, 220, 227, 240, 267, 287, 290, 297, 937','autobusowy',7423521.963,5550817.3064);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Piaszczysta','207, 227, 297, 937','autobusowy',7423558.9794,5551713.8295);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','138','autobusowy',7423574.8032,5550758.705);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bratysławska','120, 140, 420','autobusowy',7423577.2076,5550316.1519);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','207, 227, 297, 337, 513, 669, 937','autobusowy',7423596.286,5550859.6276);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Sosabowskiego','172, 572','autobusowy',7423605.6354,5551113.1248);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','102, 168, 194, 207, 220, 227, 240, 267, 287, 290, 297, 337, 513, 669, 937','autobusowy',7423616.9577,5550853.7701);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bratysławska','669','autobusowy',7423669.5213,5550364.7803);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bratysławska','120, 140, 147, 420, 513, 669','autobusowy',7423708.8591,5550217.2688);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bratysławska','147, 513','autobusowy',7423762.3478,5550173.4553);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pleszowska','172','autobusowy',7423803.02,5551183.6149);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Wybickiego','102, 120, 140, 420','autobusowy',7423260.8179,5550315.0113);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Władysława Łokietka','120, 420','autobusowy',7422935.7311,5550495.1165);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Prądnik Biały','144, 904','autobusowy',7423463.5384,5551680.1546);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','18, 50, 69, 75','tramwajowy',7423635.3681,5550859.959);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Białoprądnicka','18, 50, 69, 75','tramwajowy',7423791.1958,5551528.7435);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bratysławska','18, 3, 5, 50, 69, 75','tramwajowy',7423723.2417,5550277.1339);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bratysławska','18, 3, 5, 50, 69, 75','tramwajowy',7423683.4025,5550379.4884);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','18, 3, 5, 50, 69, 75','tramwajowy',7423629.6025,5550837.1256);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Krowodrza Górka P+R','3, 5','tramwajowy',7423551.1888,5550909.1076);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Białoprądnicka','18, 50, 69, 75','tramwajowy',7423815.2997,5551512.826);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pachońskiego P+R','18, 50, 69, 75','tramwajowy',7423429.9931,5551441.5767);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pachońskiego P+R','18, 50, 69, 75','tramwajowy',7423445.1441,5551400.2002);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Pękowicka','290','autobusowy',7422382.5309,5552190.5548);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Prądnik Biały Zachód','290','autobusowy',7422921.7209,5552416.3566);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Prądnik Biały Zachód','290, 337, 513','autobusowy',7422962.5863,5552278.1606);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Prądnik Biały Zachód','337','autobusowy',7422998.1584,5552363.3042);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Prądnik Biały Zachód','513','autobusowy',7423010.9619,5552149.5348);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Glogera Granica Miasta (nż)','207, 227, 297, 937','autobusowy',7423204.7581,5552569.6876);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Glogera (nż)','207, 227, 297, 937','autobusowy',7423282.0835,5552384.1372);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Glogera (nż)','207, 227, 297, 937','autobusowy',7423281.6787,5552345.9871);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Os. Marszowiec','267, 287, 317','autobusowy',7424295.0991,5554181.5886);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Os. Marszowiec','267, 287, 317','autobusowy',7424310.9923,5554122.0714);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Witkowice','317','autobusowy',7424344.2721,5552901.6125);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Witkowice','267, 287, 317','autobusowy',7424401.1395,5553022.283);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Witkowice','267, 287, 317','autobusowy',7424411.8407,5553050.4981);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Witkowice Nowe','267, 287, 317','autobusowy',7424461.6294,5552675.9111);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Witkowice Nowe','267, 287, 317','autobusowy',7424496.9784,5552625.6864);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Dożynkowa','267, 287, 317','autobusowy',7424599.3074,5552363.38);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Dożynkowa','267, 287, 317','autobusowy',7424602.552,5552344.8681);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Glogera Granica Miasta (nż)','207, 227, 297, 937','autobusowy',7423198.8293,5552575.335);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Gaik (nż)','120','autobusowy',7419780.6444,5553111.7114);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Gaik (nż)','120','autobusowy',7419822.4673,5553114.5319);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bronowice Wielkie','120','autobusowy',7419893.1474,5552813.7804);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie','420','autobusowy',7420313.3529,5553179.2709);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie','120','autobusowy',7420315.0865,5553218.7365);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie','120','autobusowy',7420351.683,5553235.7671);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Na Budzyniu','120, 420','autobusowy',7420841.9119,5553445.7366);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Na Budzyniu','120, 420','autobusowy',7420849.2044,5553440.6226);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie Gliniki (nż)','220','autobusowy',7420916.2692,5554012.8665);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie Gliniki (nż)','220','autobusowy',7420921.7388,5554015.1216);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie Skrzyżowanie','120, 220, 240, 290, 420','autobusowy',7421209.0314,5553532.4168);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie Kąty (nż)','240, 290','autobusowy',7421410.0595,5553868.6348);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie Kąty (nż)','240, 290','autobusowy',7421424.244,5553884.6676);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Gospodarska','120, 220, 240, 290, 420','autobusowy',7421505.056,5553046.3747);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Gospodarska','120, 220, 240, 290, 420','autobusowy',7421541.3611,5552985.325);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Bronowice Wielkie','120','autobusowy',7419946.0751,5552721.9894);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Tonie Skrzyżowanie','120, 220, 240, 290, 420','autobusowy',7421216.2349,5553540.6537);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Żabiniec','147','autobusowy',7424650.4022,5550344.0778);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Imbramowska','138, 169, 172, 572','autobusowy',7424668.3057,5550771.3245);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górka Narodowa P+R','128, 169, 193, 217, 247, 257, 277, 280, 469, 503, 669, 917','autobusowy',7425871.2077,5552613.6688);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Górka Narodowa P+R','217, 247, 257, 277, 280, 307, 917','autobusowy',7425968.5462,5552683.4017);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Witkowicka','217, 247, 257, 277, 280, 307, 917','autobusowy',7425999.2592,5553005.0179);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Witkowicka','217, 247, 257, 277, 280, 307, 917','autobusowy',7426035.0158,5553055.6934);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna Wiadukt','169, 267, 287, 469','autobusowy',7424622.8562,5551603.27);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna Wiadukt','669','autobusowy',7424632.4278,5551667.9886);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna Wiadukt','267, 287','autobusowy',7424673.7238,5551673.5245);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna','267, 287','autobusowy',7424694.1515,5551955.1217);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna','317','autobusowy',7424715.4773,5552016.2263);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (4,'Siewna','267, 287, 317','autobusowy',7424693.5143,5552041.8988);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','103, 202, 212, 222, 232, 262, 664, 701','autobusowy',7430307.4471,5549670.4248);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','103, 122, 142, 172, 189, 422, 442, 572','autobusowy',7430442.0151,5549642.309);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Zgody','103, 122, 142, 172, 189, 422, 442, 502, 572','autobusowy',7430650.5819,5549425.0216);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Zgody','21, 4, 75','tramwajowy',7430632.1202,5549425.5948);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','1, 14, 5, 52, 64, 9','tramwajowy',7430323.6444,5549666.4316);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Kocmyrzowskie im. Ks. Gorzelanego','21, 4, 75','tramwajowy',7430436.3056,5549665.632);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Teatr Ludowy','110, 123, 132, 139, 160, 163, 193, 501, 601','autobusowy',7430829.3377,5549906.8133);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Żeromskiego','110, 132, 139, 160, 163, 193, 501, 601','autobusowy',7431186.2203,5549666.7174);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Żeromskiego','110, 139, 160, 163, 193, 501, 601','autobusowy',7431233.6513,5549542.0772);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Górali','123, 132','autobusowy',7431331.45,5549894.3335);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Górali','123, 132','autobusowy',7431387.1043,5549880.4928);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Zielone','123, 132','autobusowy',7431680.2782,5549649.5913);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Zielone','123, 132','autobusowy',7431720.5725,5549693.9052);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Teatr Ludowy','110, 123, 132, 139, 160, 163, 193, 501, 601','autobusowy',7430860.739,5549888.4978);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Łempickiego (nż)','132, 139, 142, 149, 172, 174, 442, 601, 704','autobusowy',7432728.1267,5549554.9899);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Łempickiego (nż)','132, 139, 142, 172, 174, 442, 601, 704','autobusowy',7432820.1408,5549568.7387);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kombinat','132, 139, 142, 172, 174, 442, 601, 704','autobusowy',7433046.6871,5549664.7865);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kombinat','138, 142, 442, 601','autobusowy',7433175.6529,5549639.9246);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kombinat','132, 138, 139, 172, 174, 242, 272, 704','autobusowy',7433189.3903,5549593.5896);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kombinat','22','tramwajowy',7433151.5672,5549591.3927);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąska (nż)','111, 211','autobusowy',7439585.6835,5549290.4599);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąska (nż)','161','autobusowy',7439632.1606,5549323.8614);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąska (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7439560.235,5549344.2511);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąska (nż)','171, 271','autobusowy',7439771.9105,5549452.6517);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Cmentarz Ruszcza (nż)','111, 131, 141, 160, 161','autobusowy',7439156.5082,5550212.4531);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Cmentarz Ruszcza (nż)','111, 131, 141, 160, 161','autobusowy',7439162.0502,5550215.1709);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Ruszcza','111, 131, 141, 160, 161','autobusowy',7438921.7835,5550434.3732);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąska (nż)','111, 131, 141, 160, 161','autobusowy',7439485.5807,5549389.1442);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kujawy','181','autobusowy',7435551.8873,5546164.3444);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Chałupki','131','autobusowy',7437123.9735,5546238.7491);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kępa Grabska','141','autobusowy',7439531.1072,5546221.8023);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kąkolowa (nż)','131','autobusowy',7437516.5825,5546505.0071);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kąkolowa (nż)','131','autobusowy',7437497.4867,5546507.3435);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Truskawkowa (nż)','131','autobusowy',7437555.1706,5546098.4401);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Truskawkowa (nż)','131','autobusowy',7437551.5917,5546080.2394);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Oczyszczalnia Ścieków Kujawy (nż)','181','autobusowy',7435673.8899,5546571.3322);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Oczyszczalnia Ścieków Kujawy (nż)','181','autobusowy',7435677.3918,5546677.9646);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Przylasek Rusiecki','141','autobusowy',7440114.5628,5545882.4324);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wolica Most','211','autobusowy',7443244.7012,5546473.5648);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wolica Most','111, 161, 211','autobusowy',7443154.1111,5546514.9035);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Ciekowiec (nż)','141','autobusowy',7440147.9536,5546447.124);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Ciekowiec (nż)','141','autobusowy',7440141.7534,5546424.2793);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Zakarnie (nż)','149','autobusowy',7432825.1527,5546735.1433);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Zakarnie (nż)','149','autobusowy',7432861.8193,5546740.5787);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Lesisko','103, 123, 149, 193','autobusowy',7431636.258,5546865.5519);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Lesisko','123','autobusowy',7431636.0426,5546871.1165);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Lasek Mogilski','123, 163, 193','autobusowy',7431949.0817,5547027.975);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kępa (nż)','149','autobusowy',7433108.6448,5547000.0055);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kępa (nż)','149','autobusowy',7433124.0053,5547042.862);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Stare Wiślisko','123, 163, 193','autobusowy',7432001.8423,5547437.6572);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Stare Wiślisko','123, 163, 193','autobusowy',7431992.6046,5547454.5714);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Giedroycia ZTPO (nż)','149','autobusowy',7433986.9504,5547417.3569);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Giedroycia ZTPO (nż)','149','autobusowy',7434011.5116,5547428.8449);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Giedroycia (nż)','149','autobusowy',7434244.3775,5547754.0128);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Klasztor Cystersów','123, 163, 193','autobusowy',7432141.5452,5547989.9546);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Giedroycia (nż)','149','autobusowy',7434198.1918,5547992.737);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Klasztor Cystersów','123, 163, 193','autobusowy',7432135.7677,5548104.602);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Fort Mogiła','149','autobusowy',7433438.4122,5548102.6948);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Fort Mogiła','149','autobusowy',7433454.3913,5548132.4186);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Sieroszewskiego (nż)','123, 163, 193','autobusowy',7432071.4342,5548203.4184);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Sieroszewskiego (nż)','123, 163, 193','autobusowy',7432091.1525,5548205.6153);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Szpital Żeromskiego','123, 163, 193','autobusowy',7431776.125,5548240.8817);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Szpital Żeromskiego','123, 163, 193','autobusowy',7431741.5212,5548256.1177);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Lasek Mogilski','123, 163, 193','autobusowy',7431937.166,5546885.0759);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Brama nr 4 (nż)','10, 21','tramwajowy',7433758.9568,5548054.8886);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Brama nr 4 (nż)','10, 21','tramwajowy',7433791.5257,5548048.2562);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Fort Mogiła (nż)','10, 21','tramwajowy',7433515.3348,5548219.6487);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Fort Mogiła (nż)','10, 21','tramwajowy',7433476.5763,5548252.3892);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Giedroycia (nż)','10, 21','tramwajowy',7434453.9448,5548009.0634);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Giedroycia (nż)','10, 21','tramwajowy',7434477.0043,5548021.0169);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Czyżyńskie','113, 148, 202, 212, 222, 232, 262, 603, 664, 701','autobusowy',7429603.8777,5549090.1901);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Czyżyńskie','103, 202, 212, 222, 232, 262, 664, 701','autobusowy',7429744.8104,5549153.2998);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Czyżyńskie','174, 662','autobusowy',7429782.1833,5549006.3082);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bieńczycka','103, 664, 701','autobusowy',7429994.9949,5549364.8196);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Kolorowe','174, 662','autobusowy',7430450.1383,5548934.9523);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Kolorowe','174, 662','autobusowy',7430563.6941,5548886.0893);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Zgody','103, 122, 142, 172, 189, 422, 442, 502, 572','autobusowy',7430668.522,5549373.1746);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bieńczycka','103, 664, 701','autobusowy',7429969.0652,5549380.0651);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Czyżyńskie','1, 14, 5, 52, 64, 9','tramwajowy',7429711.1979,5549134.1636);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Czyżyńskie','10, 22, 4, 62, 75','tramwajowy',7429770.878,5549034.0437);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rondo Czyżyńskie','1, 14, 22, 62','tramwajowy',7429640.3831,5548975.468);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Kolorowe','10, 22, 4, 62, 75','tramwajowy',7430550.9329,5548901.2721);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Kolorowe','10, 22, 4, 62, 75','tramwajowy',7430459.3447,5548921.7065);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Zgody','21, 4, 75','tramwajowy',7430680.4779,5549373.2421);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bieńczycka','1, 14, 5, 52, 64, 9','tramwajowy',7429885.9849,5549295.1667);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bieńczycka','1, 14, 5, 52, 64, 9','tramwajowy',7429896.0624,5549299.3729);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Przylasek Rusiecki Kąpielisko','141','autobusowy',7439973.7416,5546757.5254);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Przylasek Rusiecki Kąpielisko','141','autobusowy',7439964.5109,5546783.7688);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wolica Kościół (nż)','161, 211','autobusowy',7442882.6199,5546845.4846);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wolica Kościół (nż)','111, 211','autobusowy',7442855.1835,5546871.5834);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Betonowa','161','autobusowy',7442903.8792,5546918.3373);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wolica Szkoła (nż)','111, 211','autobusowy',7442293.0493,5546935.4569);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wolica Szkoła (nż)','161, 211','autobusowy',7442243.6572,5546944.1097);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Betonowa','111','autobusowy',7442878.2884,5547003.2583);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bartnicza (nż)','111, 211','autobusowy',7441787.384,5547034.592);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bartnicza (nż)','161, 211','autobusowy',7441770.9038,5547040.3329);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Siejówka (nż)','111, 211','autobusowy',7441362.9453,5547094.6203);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Siejówka (nż)','161, 211','autobusowy',7441322.8058,5547117.4182);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rzepakowa Świetlica (nż)','141','autobusowy',7439754.7088,5547162.3187);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rzepakowa Świetlica (nż)','141','autobusowy',7439761.0928,5547163.2479);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Przylasek Wyciąski (nż)','111, 211','autobusowy',7441048.3568,5547309.6424);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Przylasek Wyciąski (nż)','161, 211','autobusowy',7441054.3958,5547311.8005);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Przylasek Rusiecki Północ (nż)','141','autobusowy',7439495.4116,5547403.9521);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Przylasek Rusiecki Północ (nż)','141','autobusowy',7439465.4042,5547428.9854);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Ks. Luzara (nż)','111','autobusowy',7442294.0604,5547772.8055);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Drożyska (nż)','161, 211','autobusowy',7440456.9867,5547983.8139);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Drożyska (nż)','111, 211','autobusowy',7440448.7406,5548002.0367);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Prawocheńskiego (nż)','141','autobusowy',7439353.5108,5548031.8054);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Prawocheńskiego (nż)','141','autobusowy',7439358.9069,5548040.4204);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Ks. Luzara (nż)','161','autobusowy',7442347.6151,5547686.0227);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Koksochemia (nż)','181','autobusowy',7435902.3137,5548778.5028);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Koksochemia (nż)','181','autobusowy',7435961.7015,5548823.5092);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Suchy Jar (nż)','181','autobusowy',7436108.9344,5548551.2237);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Suchy Jar (nż)','181','autobusowy',7436133.7254,5548552.8186);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Karowa (nż)','181','autobusowy',7436132.9688,5547529.9083);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Karowa (nż)','181','autobusowy',7436135.7093,5547525.5374);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Gwarecka (nż)','181','autobusowy',7436252.492,5548197.5623);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Gwarecka (nż)','181','autobusowy',7436255.6593,5548180.9505);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Cmentarz Pleszów (nż)','181','autobusowy',7436674.0549,5548831.0444);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Pleszów','','autobusowy',7436841.3844,5548911.602);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Pleszów','111, 131, 141, 160, 161, 171, 181, 211, 271','autobusowy',7436841.3844,5548911.602);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Igołomska Zakłady (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7437894.306,5549069.9043);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Igołomska Zakłady (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7437979.0799,5549021.7569);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Branice (nż)','131','autobusowy',7438197.589,5547356.7174);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Branice (nż)','131','autobusowy',7438197.7235,5547362.1664);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Branice Szkoła','131','autobusowy',7438651.3571,5547466.8449);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Branice Szkoła','131','autobusowy',7438655.4022,5547476.1422);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Brama nr 8 (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7437437.2787,5548971.0047);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Brama nr 8 (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7437484.4782,5548954.5462);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plastusia (nż)','131','autobusowy',7438420.1814,5548410.3204);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Deszczowa (nż)','131','autobusowy',7438517.906,5548061.144);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Szymańskiego (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7438356.3501,5549127.4056);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Szymańskiego (nż)','131','autobusowy',7438401.4389,5549045.6848);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Chałupki Górne (nż)','131','autobusowy',7437388.9538,5546903.0496);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Branice Ośrodek Zdrowia (nż)','131','autobusowy',7437626.5622,5547282.5876);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Branice Ośrodek Zdrowia (nż)','131','autobusowy',7437663.3075,5547271.0359);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Nadbrzezie (nż)','181','autobusowy',7435699.5626,5548599.734);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Nadbrzezie (nż)','181','autobusowy',7435695.9199,5548588.543);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Dymarek (nż)','181','autobusowy',7435822.1837,5547368.5542);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Szymańskiego (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7438440.9541,5549120.2018);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Chałupki Górne (nż)','131','autobusowy',7437349.9839,5546865.4635);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Dymarek (nż)','181','autobusowy',7435900.2228,5547402.9915);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plastusia (nż)','131','autobusowy',7438441.6614,5548422.865);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Deszczowa (nż)','131','autobusowy',7438533.1557,5547880.3243);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Brama nr 5 (nż)','10, 21','tramwajowy',7434983.4456,5548509.3917);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Brama nr 5 (nż)','10, 21','tramwajowy',7434969.2728,5548497.8843);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Meksyk (nż)','10, 21','tramwajowy',7435192.6213,5548577.9327);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Meksyk (nż)','10, 21','tramwajowy',7435232.3114,5548586.017);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Koksochemia (nż)','10, 21','tramwajowy',7435911.6409,5548804.0865);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Koksochemia (nż)','10, 21','tramwajowy',7435894.7477,5548804.2889);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Pleszów','10, 21','tramwajowy',7436785.8512,5548901.2459);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bulwarowa (nż)','501','autobusowy',7432122.6217,5549319.7005);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Klasztorna','123, 149, 163, 174, 193, 601','autobusowy',7432123.7243,5548504.0958);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Klasztorna','10, 21, 22','tramwajowy',7432146.7764,5548481.3334);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bulwarowa (nż)','163, 174, 193','autobusowy',7432200.1646,5549230.5057);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bulwarowa (nż)','174','autobusowy',7432216.6005,5549205.6026);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Klasztorna','10, 21, 22','tramwajowy',7432207.0135,5548466.22);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Willowe','123, 163, 193, 601','autobusowy',7432240.3165,5548941.6701);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bulwarowa Ogródki Działkowe (nż)','123, 163, 174, 193','autobusowy',7432244.5727,5548757.7413);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Willowe','123, 163, 174, 193, 601','autobusowy',7432268.0113,5548884.2546);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Suche Stawy','10, 21, 22','tramwajowy',7432684.2939,5548353.0706);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bardosa','10, 21, 22','tramwajowy',7433060.7352,5548373.7082);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Bardosa','10, 21, 22','tramwajowy',7433058.1268,5548376.9667);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kopiec Wandy','22','tramwajowy',7433190.7293,5548617.8045);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kopiec Wandy','22','tramwajowy',7433211.3181,5548592.4079);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Suche Stawy','10, 21, 22','tramwajowy',7432708.4235,5548347.4276);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Aleja Przyjaźni','103, 110, 122, 160, 422, 601, 704','autobusowy',7430849.1565,5549230.8983);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Aleja Przyjaźni','502','autobusowy',7430862.318,5549230.0607);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Aleja Przyjaźni','601','autobusowy',7430879.8989,5549260.98);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Aleja Przyjaźni','572','autobusowy',7430898.511,5549249.8381);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plac Centralny im. R.Reagana','174, 662','autobusowy',7430928.315,5548858.1188);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plac Centralny im. R.Reagana','139, 189, 601, 704','autobusowy',7431015.2791,5549000.7153);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Aleja Róż','110, 142, 160, 172, 442, 601','autobusowy',7431132.2518,5549211.3378);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Aleja Róż','110, 139, 160, 163, 193, 501, 601','autobusowy',7431185.3287,5549285.9624);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plac Centralny im. R.Reagana','149, 174, 601','autobusowy',7431173.6495,5548778.9805);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plac Centralny im. R.Reagana','149, 704','autobusowy',7431200.6723,5548926.1338);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Aleja Róż','139, 142, 163, 172, 193, 442, 501','autobusowy',7431209.2414,5549185.9858);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Na Skarpie','123, 163, 193','autobusowy',7431649.7386,5548475.426);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Na Skarpie','10, 21, 22','tramwajowy',7431668.8609,5548621.57);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Struga','139, 142, 149, 163, 172, 193, 442, 501, 704','autobusowy',7431730.2114,5549164.9595);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Na Skarpie','10, 21, 22','tramwajowy',7431722.6094,5548608.7587);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Na Skarpie','123, 149, 163, 174, 193, 601','autobusowy',7431732.8507,5548592.1648);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Struga','123','autobusowy',7431757.1784,5549208.109);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Na Skarpie','149, 174, 601','autobusowy',7431774.9981,5548607.2002);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Struga','123','autobusowy',7431794.3139,5549133.6624);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Struga','132, 601','autobusowy',7431829.1598,5549199.6267);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Struga','132, 139, 142, 149, 163, 172, 193, 442, 501, 601, 704','autobusowy',7431831.9873,5549174.3398);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Os. Wandy','123, 163, 193','autobusowy',7431893.9753,5548572.2014);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Orkana','123, 601','autobusowy',7432013.3074,5549004.2857);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Klasztorna','123, 149, 163, 174, 193, 601','autobusowy',7432014.4391,5548507.5973);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plac Centralny im. R.Reagana','10, 22, 4, 62, 75','tramwajowy',7430967.6127,5548840.9257);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plac Centralny im. R.Reagana','21, 4, 75','tramwajowy',7431019.5232,5548980.0816);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Plac Centralny im. R.Reagana','10, 21, 22','tramwajowy',7431171.9487,5548791.461);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Zakępie (nż)','161','autobusowy',7441987.0468,5548269.8888);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Podstawie (nż)','111, 211','autobusowy',7440373.5178,5548338.6888);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Zakępie (nż)','111','autobusowy',7441992.3511,5548296.8609);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Podstawie (nż)','161, 211','autobusowy',7440367.773,5548401.3773);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Tymiankowa (nż)','111, 211','autobusowy',7440081.6908,5548498.4558);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Tymiankowa (nż)','161, 211','autobusowy',7440029.9274,5548511.1604);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąże Sklep (nż)','111, 211','autobusowy',7439757.7145,5548777.0653);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąże Sklep (nż)','161, 211','autobusowy',7439754.8443,5548801.9028);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Szlifierska (nż)','111','autobusowy',7442000.4731,5548788.3114);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Szlifierska (nż)','161','autobusowy',7441992.0072,5548806.423);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Barwinkowa (nż)','141','autobusowy',7439205.0575,5549037.3781);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rzepakowa (nż)','141','autobusowy',7439092.4155,5549172.5859);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rzepakowa (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7439102.1751,5549224.9773);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Rzepakowa (nż)','111, 131, 141, 160, 161, 171, 211, 271','autobusowy',7438961.5028,5549249.3842);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąże Północ (nż)','161','autobusowy',7440177.3445,5549420.2916);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Janówka (nż)','171, 271','autobusowy',7439893.8598,5549590.4331);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Janówka (nż)','171, 271','autobusowy',7439901.1825,5549592.353);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Czeczeńska (nż)','111','autobusowy',7440853.1142,5549572.505);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Cło','161','autobusowy',7441760.22,5549610.0436);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Cło','111','autobusowy',7441722.8343,5549693.431);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Błonia Kościelnickie (nż)','171, 271','autobusowy',7440332.3635,5550136.129);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Błonia Kościelnickie (nż)','171, 271','autobusowy',7440305.4375,5550141.2127);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wyciąże Północ (nż)','111','autobusowy',7440106.3343,5549432.9886);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Barwinkowa (nż)','141','autobusowy',7439263.9415,5548927.3658);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Czeczeńska (nż)','161','autobusowy',7440977.6089,5549554.6666);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Zabłocie Kościelnickie (nż)','171, 271','autobusowy',7440895.8678,5551354.2194);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Zabłocie Kościelnickie (nż)','171, 271','autobusowy',7440909.6077,5551302.5661);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Hektary (nż)','171, 271','autobusowy',7441039.8826,5552952.9519);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wróżenicka (nż)','271','autobusowy',7441226.2132,5553230.9856);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Resztówka','171, 271','autobusowy',7441203.0289,5551735.3661);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Resztówka','171, 271','autobusowy',7441231.5116,5551703.3511);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wróżenice Górka (nż)','171, 271','autobusowy',7441531.186,5553299.8288);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wróżenice Górka (nż)','171, 271','autobusowy',7441531.8424,5553287.9196);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wróżenice','171, 271','autobusowy',7442039.8403,5553373.1487);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wróżenice','271','autobusowy',7442039.8403,5553373.1487);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Ostafina','171, 271','autobusowy',7440716.8736,5552428.0538);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kościelniki','171, 271','autobusowy',7440990.8283,5550752.0623);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Kościelniki','171, 271','autobusowy',7440983.2316,5550815.8832);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Wróżenicka (nż)','271','autobusowy',7441223.7406,5553233.7937);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Hektary (nż)','171, 271','autobusowy',7441027.4844,5552944.4125);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (18,'Ostafina','171, 271','autobusowy',7440724.6152,5552429.4139);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'AGH / UR','169, 179, 192, 301, 304, 307, 503, 513, 608','autobusowy',7422992.7303,5548130.634);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Muzeum Narodowe','144, 164, 169, 173, 179, 192, 194, 301, 304, 307, 310, 494, 503, 513, 601, 608, 611','autobusowy',7423034.4104,5547633.2305);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Plac Inwalidów','139, 159, 169, 179, 192, 199, 301, 304, 307, 469, 501, 503, 511, 513, 608','autobusowy',7423115.9587,5548633.2297);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Plac Inwalidów','664','autobusowy',7423118.0848,5548711.4018);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Wrocławska','130, 904','autobusowy',7423143.4878,5549567.151);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Plac Inwalidów','139, 159, 169, 179, 192, 199, 301, 304, 307, 501, 503, 511, 513, 608','autobusowy',7423186.008,5548694.7408);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Wrocławska','130, 904','autobusowy',7423270.9694,5549476.2156);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Radio Kraków','139, 159, 169, 179, 192, 199, 469, 608','autobusowy',7423363.7918,5548949.7139);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Radio Kraków','139, 159, 169, 179, 192, 199, 608','autobusowy',7423430.6868,5548946.4196);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Friedleina','130, 904','autobusowy',7423503.3005,5549372.8807);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Friedleina','130, 904','autobusowy',7423509.9856,5549354.764);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Plac Inwalidów','13, 14, 24, 4, 64, 8','tramwajowy',7423109.2927,5548712.4181);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Szpital Narutowicza','120, 140, 147, 420, 513, 669','autobusowy',7423921.8398,5549948.0331);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Szpital Narutowicza','18, 3, 5, 50, 69, 75','tramwajowy',7423966.9228,5549947.058);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Szpital Narutowicza','18, 3, 5, 50, 69, 75','tramwajowy',7423991.2749,5549927.912);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','18, 75','tramwajowy',7423883.7913,5549135.7355);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','18, 75','tramwajowy',7423871.0788,5549137.9188);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','130, 139, 159, 169, 179, 189, 192, 199, 304, 307, 501, 503, 511, 669, 904','autobusowy',7423921.0985,5549151.3346);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','139, 159, 169, 179, 192, 199, 301, 304, 307, 469, 501, 503, 511, 513, 608','autobusowy',7423761.3251,5549167.9602);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','130, 189, 904','autobusowy',7423857.8969,5549217.7551);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','189','autobusowy',7423859.1125,5549262.9017);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','120, 140, 147, 337, 420','autobusowy',7423843.4328,5549282.926);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','130','autobusowy',7423770.5851,5549285.1876);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','301','autobusowy',7423858.5365,5549292.8338);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Dworzec Towarowy','18, 75','tramwajowy',7424104.4806,5549299.9052);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Nowy Kleparz','120, 140, 147, 420, 513, 669','autobusowy',7423857.5716,5549360.8159);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Dworzec Towarowy','17, 19, 3, 5, 50, 69','tramwajowy',7424156.045,5549402.1827);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Dworzec Towarowy','18, 3, 5, 50, 69, 75','tramwajowy',7424149.8537,5549409.8349);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Łobzów SKA','102, 130, 144, 194, 494, 904','autobusowy',7422441.7969,5550061.631);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Łobzów SKA','102, 130, 144, 194, 494, 904','autobusowy',7422434.0489,5550055.5139);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Czarnowiejska','139, 144, 159, 164, 173, 194, 199, 310, 494, 501, 511, 601, 611','autobusowy',7422898.633,5548338.8985);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'AGH / UR','144, 164, 169, 173, 179, 192, 194, 301, 304, 307, 310, 469, 494, 503, 513, 601, 608, 611','autobusowy',7422904.1331,5547945.4696);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Miasteczko Studenckie AGH','102, 159','autobusowy',7421520.5918,5548748.2879);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Cichy Kącik','109, 159','autobusowy',7421507.5326,5548004.7144);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Miasteczko Studenckie AGH','139, 159, 164, 173, 199, 501, 511, 601, 611','autobusowy',7421726.6225,5548736.2579);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Kawiory','139, 159, 164, 173, 199, 601, 611','autobusowy',7422174.4407,5548591.0039);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Kawiory','144, 194, 494','autobusowy',7422240.8056,5548595.267);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Kawiory','144, 194, 494','autobusowy',7422249.942,5548637.6285);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Cichy Kącik','1, 20','tramwajowy',7421486.9604,5547998.453);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Armii Krajowej','164, 173, 199, 601, 611','autobusowy',7420607.2563,5549013.0657);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Armii Krajowej','164, 173, 199, 601, 611','autobusowy',7420620.8569,5548983.9407);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Miasteczko Studenckie AGH','139, 164, 173, 199, 501, 511, 601, 611','autobusowy',7421647.4445,5548771.2349);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Głowackiego','102, 664','autobusowy',7421729.5557,5549406.2266);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'UKEN','102','autobusowy',7421913.7534,5549263.7021);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'UKEN','664','autobusowy',7421971.6941,5549245.6137);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'UKEN','664','autobusowy',7422036.0166,5549238.001);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'UKEN','102','autobusowy',7422088.2759,5549218.1057);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Biprostal','102','autobusowy',7422328.2984,5549127.4002);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Biprostal','664','autobusowy',7422348.6736,5549100.74);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Biprostal','144, 194, 494','autobusowy',7422349.5506,5549037.8756);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Biprostal','102, 144, 194, 494','autobusowy',7422399.4645,5549152.1751);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Biprostal','664','autobusowy',7422407.6185,5549092.4312);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Chopina','139, 144, 159, 164, 173, 194, 199, 494, 601, 611','autobusowy',7422496.7851,5548506.674);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Mazowiecka','102, 144, 194, 494','autobusowy',7422542.1755,5549643.1298);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Mazowiecka','102, 144, 194, 494','autobusowy',7422569.156,5549726.6153);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Urzędnicza','664','autobusowy',7422627.2544,5548982.4567);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Urzędnicza','664','autobusowy',7422694.3154,5548965.913);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Urząd Marszałkowski','130, 904','autobusowy',7422864.1033,5549747.3812);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Czarnowiejska','139, 144, 159, 164, 173, 194, 199, 310, 494, 501, 511, 601, 611','autobusowy',7422839.9644,5548376.8992);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Urząd Marszałkowski','130, 904','autobusowy',7422884.9484,5549738.4037);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Miasteczko Studenckie AGH','102','autobusowy',7421559.1149,5548816.8041);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Przybyszewskiego','139, 164, 173, 199, 310, 501, 511, 601, 611','autobusowy',7421201.5452,5548855.3222);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Urzędnicza','13, 14, 24, 4, 64, 8','tramwajowy',7422673.2383,5548973.8934);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Urzędnicza','13, 14, 24, 4, 64, 8','tramwajowy',7422637.287,5548983.0903);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Biprostal','13, 14, 24, 4, 64, 8','tramwajowy',7422411.4779,5549087.0356);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Biprostal','13, 14, 24, 4, 64, 8','tramwajowy',7422338.1192,5549113.4636);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Głowackiego','13, 14, 24, 4, 64, 8','tramwajowy',7421751.643,5549374.533);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'UKEN','13, 14, 24, 4, 64, 8','tramwajowy',7422035.2962,5549232.7831);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'UKEN','13, 14, 24, 4, 64, 8','tramwajowy',7421978.2564,5549248.8553);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (5,'Szpital Narutowicza','120, 140, 147, 420, 513, 669','autobusowy',7423913.197,5549979.5262);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Pasternik (nż)','238, 248, 258, 268, 278, 288, 948','autobusowy',7419024.8851,5552008.227);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Cmentarz Bronowice (nż)','238, 248, 258, 268, 278, 288, 948','autobusowy',7419380.4181,5551664.4462);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice Małe','120, 238, 248, 258, 268, 278, 288','autobusowy',7419962.542,5550152.2396);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Katowicka','120, 238, 248, 258, 268, 278, 288, 948','autobusowy',7420014.2058,5551107.603);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice Małe','164, 172, 199, 572, 601, 664, 910, 948','autobusowy',7420061.6522,5550150.2004);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice Małe','120, 164, 172, 199, 200, 210, 230, 238, 248, 258, 268, 278, 288, 572, 601, 910, 948','autobusowy',7420093.4621,5550161.6278);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Katowicka','120, 238, 248, 258, 268, 278, 288, 948','autobusowy',7420123.7866,5550998.0579);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice SKA','120','autobusowy',7420462.2011,5550095.835);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice SKA','164, 172, 199, 601, 664','autobusowy',7420480.0055,5550084.8908);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice SKA','120, 172, 173, 200, 210, 230, 238, 248, 258, 268, 278, 288, 310, 501, 511, 572, 611, 910, 948','autobusowy',7420601.5881,5550072.8493);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Cmentarz Bronowice (nż)','238, 248, 258, 268, 278, 288, 948','autobusowy',7419414.7569,5551597.2931);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Giełda Balicka (nż)','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7419548.5512,5550097.7151);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Rondo Ofiar Katynia','120, 172, 173, 200, 210, 230, 238, 248, 258, 268, 278, 288, 310, 501, 511, 572, 611, 910, 948','autobusowy',7420641.8132,5550641.4823);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Pasternik (nż)','238, 248, 258, 268, 278, 288, 948','autobusowy',7419080.456,5551883.4591);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice SKA','24, 4, 64, 8','tramwajowy',7420458.6625,5550079.3124);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice Małe','24, 4, 64, 8','tramwajowy',7419981.5417,5550116.0236);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Przybyszewskiego','164, 173, 199, 310, 501, 511, 601, 611','autobusowy',7421097.6041,5548924.6014);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Głowackiego','664','autobusowy',7421669.7389,5549437.8054);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Wesele','24, 4, 64, 8','tramwajowy',7421117.2772,5549772.758);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Głowackiego','13, 14, 24, 4, 64, 8','tramwajowy',7421684.1384,5549433.5898);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice','13, 14','tramwajowy',7421409.8739,5549589.3486);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice','24, 4, 64, 8','tramwajowy',7421317.7987,5549646.8802);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice','24, 4, 64, 8','tramwajowy',7421311.4215,5549656.2072);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Zarzecze','164, 173, 199, 501, 511, 601, 611','autobusowy',7420453.9148,5549534.07);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Zarzecze','164, 173, 199, 501, 511, 601, 611','autobusowy',7420501.4414,5549620.1326);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice SKA','120, 164, 172, 173, 199, 200, 210, 230, 238, 248, 258, 268, 278, 288, 310, 501, 511, 572, 601, 611, 910, 948','autobusowy',7420604.7777,5550008.0585);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice SKA','164, 199, 601, 664','autobusowy',7420613.4522,5550052.3156);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice SKA','24, 4, 64, 8','tramwajowy',7420537.4245,5550056.6712);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice','664','autobusowy',7421320.6191,5549663.4139);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice','664','autobusowy',7421459.3407,5549564.9271);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Wesele','664','autobusowy',7421049.4836,5549830.8262);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Wesele','664','autobusowy',7421118.8797,5549774.6255);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Wesele','24, 4, 64, 8','tramwajowy',7421035.3789,5549816.128);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Wierzyńskiego','164, 199, 218, 228, 298, 601, 918','autobusowy',7417302.3564,5550515.2292);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Wierzyńskiego','164, 199, 218, 228, 298, 601, 918','autobusowy',7417372.8113,5550424.0314);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Zakliki SKA (nż)','126','autobusowy',7417573.3125,5550011.3332);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Zakliki SKA (nż)','126','autobusowy',7417587.6604,5550013.3369);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Zakliki (nż)','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7417627.8316,5550297.5038);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Zakliki (nż)','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7417687.9793,5550294.1299);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Godlewskiego','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7417943.4965,5550208.4369);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Godlewskiego','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7417948.5846,5550213.476);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Młynówka SKA (nż)','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7418292.0756,5550099.0842);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Młynówka SKA (nż)','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7418346.8354,5550075.5537);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'UR Balicka','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7418774.5945,5550041.0037);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Lindego (nż)','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7419104.1521,5550025.8834);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Lindego (nż)','172','autobusowy',7419176.0343,5549917.7797);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Giełda Balicka (nż)','126, 164, 172, 199, 218, 228, 298, 601, 918','autobusowy',7419528.4142,5550096.2382);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice Małe','126, 218, 228, 298, 918','autobusowy',7419877.3195,5550034.9309);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice Małe','200, 210, 218, 228, 230, 298, 918','autobusowy',7419888.6704,5550032.8696);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Bronowice Małe','126, 164, 172, 572','autobusowy',7419893.0569,5550077.19);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Lindego (nż)','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7419271.4292,5550015.4565);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'UR Balicka','126, 164, 199, 218, 228, 298, 601, 918','autobusowy',7418808.1524,5550030.5932);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Mydlniki Granica Miasta (nż)','218, 228, 298, 918','autobusowy',7416822.1307,5551071.3415);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Mydlniki Wapiennik P+R','164, 199, 601','autobusowy',7417014.3331,5551174.9262);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Cmentarz Mydlniki (nż)','164, 199, 218, 228, 298, 601, 918','autobusowy',7417067.8355,5550780.8446);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (6,'Cmentarz Mydlniki (nż)','164, 199, 218, 228, 298, 601, 918','autobusowy',7417037.1562,5550824.0388);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Muzeum Narodowe','124, 134, 144, 164, 169, 173, 179, 194, 300, 301, 304, 307, 310, 424, 469, 494, 502, 503, 513, 608, 609','autobusowy',7423043.0434,5547506.5138);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Jubilat','124, 144, 164, 169, 173, 179, 194, 300, 301, 304, 424, 469, 494, 503, 513, 608, 609','autobusowy',7423151.3966,5547207.275);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Jubilat','124, 144, 164, 169, 173, 179, 194, 300, 301, 304, 424, 494, 503, 513, 608, 609','autobusowy',7423171.5318,5547267.8348);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Muzeum Narodowe','1, 20','tramwajowy',7422993.1514,5547572.864);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Oleandry','1, 20','tramwajowy',7422709.5275,5547635.2444);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Oleandry','1, 20','tramwajowy',7422756.8964,5547627.552);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cichy Kącik','102, 109','autobusowy',7421384.3404,5547886.1594);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cichy Kącik','102','autobusowy',7421434.3688,5547986.6548);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Reymana','1, 20','tramwajowy',7422041.2422,5547813.3608);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Park Jordana','1, 20','tramwajowy',7422536.5369,5547686.6926);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Reymana','1, 20','tramwajowy',7422009.6551,5547812.9313);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Park Jordana','1, 20','tramwajowy',7422514.5215,5547679.6695);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Lajkonika (nż)','102, 134, 152, 192, 902','autobusowy',7420412.3577,5547919.8879);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Lajkonika (nż)','102, 134, 152, 192, 902','autobusowy',7420412.3577,5547919.8879);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Tondosa (nż)','102, 134, 152, 192, 902','autobusowy',7420631.0419,5547769.1313);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Tondosa (nż)','102, 134, 152, 192, 902','autobusowy',7420739.3949,5547749.9486);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Owcy-Orwicza','102, 134, 152, 192, 902','autobusowy',7420842.4054,5547655.2023);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Wilczy Stok (nż)','152, 902','autobusowy',7417910.1192,5548635.6217);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Panieńskich Skał','152, 902','autobusowy',7418644.4358,5548670.4562);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Panieńskich Skał','152, 902','autobusowy',7418731.5179,5548657.2292);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Grabowa','152, 902','autobusowy',7418339.4876,5548797.472);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Grabowa','152, 902','autobusowy',7418314.1944,5548800.9731);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Wilczy Stok (nż)','152, 902','autobusowy',7417895.9727,5548646.9633);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Raczkiewicza (nż)','152, 192, 902','autobusowy',7416756.9985,5548726.4216);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Raczkiewicza (nż)','152, 192, 902','autobusowy',7416788.9631,5548719.1382);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Chełm','152, 192, 300, 902','autobusowy',7417409.4882,5548604.3937);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Chełm','126','autobusowy',7417476.6964,5548621.1554);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Chełm','102, 126, 152, 192, 300, 902','autobusowy',7417479.5476,5548601.7549);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Chełm','102','autobusowy',7417439.3642,5548577.6788);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Pylna (nż)','126','autobusowy',7417600.6636,5549463.5887);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Pylna (nż)','126','autobusowy',7417613.5774,5549418.892);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Wodociągi (nż)','109, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7416912.461,5545641.5331);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Wodociągi (nż)','109, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7416996.2785,5545715.1002);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielańskie Skały (nż)','109, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7417692.2607,5545960.4372);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielańskie Skały (nż)','109, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7417737.6606,5545959.1831);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Na Krępaku (nż)','109, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7418303.2027,5546068.7735);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Na Krępaku (nż)','109','autobusowy',7418361.3952,5546121.95);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Na Krępaku (nż)','209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7418395.7979,5546066.6936);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Zaskale (nż)','109','autobusowy',7418719.5171,5546240.6473);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Zaskale (nż)','109','autobusowy',7418756.5842,5546242.7543);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Żywiczna (nż)','126','autobusowy',7419148.3595,5546707.8251);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegorzały','109','autobusowy',7419138.4836,5546234.3013);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegorzały','109','autobusowy',7419153.8055,5546238.5196);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegorzały','126','autobusowy',7419168.4676,5546346.0926);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Żywiczna (nż)','126','autobusowy',7419184.3838,5546721.7425);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegorzały Obwodnica (nż)','209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7419174.5876,5546167.9001);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegorzały','126','autobusowy',7419200.3742,5546267.407);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegorzały Obwodnica (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7419278.3012,5546157.4356);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Glinnik (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7419952.6183,5546215.8341);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Glinnik (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7420037.9159,5546257.7212);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Benedyktowicza (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7420544.9073,5546308.6844);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Wodociągowa (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7421020.5237,5546350.7027);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Malczewskiego (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7421337.5783,5546434.3596);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Malczewskiego (nż)','101','autobusowy',7421440.9759,5546539.1881);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Malczewskiego (nż)','109','autobusowy',7421478.4303,5546416.6061);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Malczewskiego (nż)','101, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7421517.4811,5546446.7361);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Wodociągowa (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7420982.8879,5546353.5943);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Benedyktowicza (nż)','109, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7420433.107,5546305.1169);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany','209, 219, 229, 239, 269','autobusowy',7415432.0834,5545868.626);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany','102, 109, 609','autobusowy',7415482.1517,5545908.8847);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany','209, 219, 229, 239, 269','autobusowy',7415531.4751,5545901.9876);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielańska (nż)','249, 259','autobusowy',7415850.2869,5545141.3925);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany Szkoła','102, 109, 209, 219, 229, 239, 269, 609','autobusowy',7415887.6509,5545991.7159);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cmentarz Bielany (nż)','102','autobusowy',7415939.0349,5546494.625);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielańska (nż)','249, 259','autobusowy',7415909.69,5545182.7322);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany Szkoła','102','autobusowy',7416013.6249,5546007.4258);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany Szkoła','109, 209, 219, 229, 239, 269, 609','autobusowy',7416036.5687,5545985.8181);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany Klasztor (nż)','109, 209, 219, 229, 239, 269, 609','autobusowy',7416262.7014,5545910.4118);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Skalna (nż)','249, 259','autobusowy',7416262.5498,5545401.4707);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany Klasztor (nż)','109, 209, 219, 229, 239, 269, 609','autobusowy',7416292.1798,5545894.2653);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Skalna (nż)','249, 259','autobusowy',7416305.8003,5545399.9045);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Obserwatorium (nż)','102','autobusowy',7415989.3876,5547019.0212);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Obserwatorium (nż)','102','autobusowy',7415997.3518,5547024.4584);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Bielany Obwodnica (nż)','209, 219, 229, 239, 269','autobusowy',7414896.2391,5545749.1861);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cmentarz Bielany (nż)','102','autobusowy',7415944.3606,5546386.7451);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Plac Na Stawach','502','autobusowy',7422702.018,5547105.5102);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cracovia Błonia','134, 152, 192, 502, 902','autobusowy',7422784.5801,5547516.2448);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cracovia Błonia','134, 152, 192, 300, 902','autobusowy',7422816.6846,5547532.579);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cracovia Stadion','134, 307, 310','autobusowy',7422865.6621,5547442.6571);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Aleja Waszyngtona (nż)','101','autobusowy',7420957.5207,5546915.5192);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Piastowska','102, 134, 152, 192, 902','autobusowy',7421059.0858,5547527.2981);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Aleja Waszyngtona (nż)','101','autobusowy',7421061.3483,5546937.9036);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Piastowska','102, 109','autobusowy',7421205.4668,5547575.7555);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Piastowska','109, 134, 152, 192, 902','autobusowy',7421248.3414,5547399.0279);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegon','109','autobusowy',7421540.8345,5547213.8513);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegon','109, 134, 152, 192, 902','autobusowy',7421561.9188,5547269.4969);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Przegon','134, 152, 192, 902','autobusowy',7421614.1915,5547273.7368);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Dom Zwierzyniecki','109','autobusowy',7421954.5327,5547072.865);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Salwator','109','autobusowy',7422177.8411,5546924.5536);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Salwator','109','autobusowy',7422187.587,5546900.2724);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Instytut Reumatologii','134, 152, 192, 902','autobusowy',7422226.5087,5547409.8605);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Instytut Reumatologii','134, 152, 192, 902','autobusowy',7422254.8292,5547407.1128);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Salwator','502','autobusowy',7422437.4313,5546901.6511);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'ZOO','134','autobusowy',7418037.6776,5547174.8127);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Zielony Dół','102, 126, 192','autobusowy',7418082.3606,5548474.3469);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Zielony Dół','102, 126, 192','autobusowy',7418110.4217,5548469.1337);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Kopalina (nż)','102, 126, 192','autobusowy',7418439.1899,5548377.1175);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Kopalina (nż)','102, 126, 192','autobusowy',7418520.819,5548358.1857);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Baba Jaga (nż)','134','autobusowy',7418544.7352,5547624.5032);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Baba Jaga (nż)','134','autobusowy',7418557.278,5547615.7465);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Kasztanowa','102, 126, 192','autobusowy',7418768.3566,5548291.7905);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Kasztanowa','102, 126, 192','autobusowy',7418827.49,5548271.9814);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Park Decjusza','102, 126, 152, 192, 902','autobusowy',7419058.8238,5548492.4088);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Park Decjusza','102, 126, 152, 192, 902','autobusowy',7419087.8407,5548484.0715);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Stara Wola','126, 134','autobusowy',7419157.3924,5547888.6465);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Stara Wola','126, 134','autobusowy',7419174.3763,5547941.5642);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Poniedziałkowy Dół (nż)','126','autobusowy',7419169.3368,5547484.7642);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Poniedziałkowy Dół (nż)','126','autobusowy',7419169.7766,5547461.7302);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Sielanka','126, 134','autobusowy',7419500.6355,5548222.0946);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Sielanka','126','autobusowy',7419507.6273,5548210.8651);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Sielanka','102, 134, 152, 192, 902','autobusowy',7419573.2462,5548298.3163);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Sielanka','102, 134, 152, 192, 902','autobusowy',7419690.0243,5548273.6456);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Strzelnica','102, 134, 152, 192, 902','autobusowy',7420007.3368,5548145.8562);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Strzelnica','102, 134, 152, 192, 902','autobusowy',7420082.2253,5548111.3639);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Kopiec Kościuszki','101','autobusowy',7420710.536,5547160.4577);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Olszanica Bory','300, 902','autobusowy',7414442.5658,5548014.4831);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Olszanica Bory','192, 300, 902','autobusowy',7414508.2598,5547980.1703);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Olszanica Kapliczka (nż)','152, 192, 902','autobusowy',7416120.5254,5548653.5997);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Olszanica Kapliczka (nż)','152, 192, 902','autobusowy',7416139.1935,5548661.4278);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Zakamycze','102','autobusowy',7416163.3277,5547565.0639);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Kosmowskiej (nż)','102','autobusowy',7416301.6754,5547884.2841);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Kosmowskiej (nż)','102','autobusowy',7416341.7507,5547905.35);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Leśmiana','152, 192, 902','autobusowy',7416419.4899,5548659.3763);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Leśmiana','152, 192, 902','autobusowy',7416452.7233,5548659.9695);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Rzepichy (nż)','102','autobusowy',7416629.0838,5548007.6592);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Rzepichy (nż)','102','autobusowy',7416638.9563,5547997.8271);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Chełmska (nż)','102','autobusowy',7417030.6635,5548172.5097);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Chełmska (nż)','102','autobusowy',7417035.7681,5548169.2044);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Olszanica Ogródki Działkowe (nż)','192, 902','autobusowy',7415419.9491,5548250.4662);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Olszanica Ogródki Działkowe (nż)','192, 902','autobusowy',7415412.7899,5548250.5794);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cmentarz Olszanica (nż)','192, 902','autobusowy',7415840.1444,5548604.8291);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cmentarz Olszanica (nż)','192, 902','autobusowy',7415789.5949,5548595.9464);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (7,'Cmentarz Olszanica (nż)','152','autobusowy',7415808.0369,5548607.5593);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Os. Podwawelskie','209, 219, 229, 239, 249, 259, 269','autobusowy',7423546.6533,5546118.5722);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Os. Podwawelskie','101, 112, 124, 126, 162, 300, 424, 612','autobusowy',7423549.3033,5546118.5344);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Szwedzka','18, 22, 52, 62','tramwajowy',7423029.9116,5546170.1407);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Szwedzka','101, 112, 126, 162, 194, 209, 219, 229, 239, 249, 259, 269, 494, 609, 612, 662','autobusowy',7423043.968,5546171.2735);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Szwedzka','194, 494, 609, 612, 662','autobusowy',7423032.5919,5546172.2158);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','101, 112, 124, 126, 144, 162, 164, 169, 173, 179, 209, 219, 229, 239, 249, 259, 269, 300, 301, 424, 469, 503, 513, 608, 610, 612','autobusowy',7423549.6464,5546323.1012);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','101, 112, 126, 162, 209, 219, 229, 239, 249, 259, 269','autobusowy',7423345.0051,5546343.7155);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','194, 494, 609, 612, 662','autobusowy',7423434.4043,5546369.0224);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','124, 194, 300, 424, 494, 609, 612, 662','autobusowy',7423453.9713,5546369.8549);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','610','autobusowy',7423590.9644,5546367.3412);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bałuckiego (nż)','112, 162','autobusowy',7423081.0834,5546495.8974);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','124, 144, 164, 169, 173, 179, 194, 300, 301, 424, 494, 503, 513, 608, 609','autobusowy',7423522.8168,5546505.8081);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Szwedzka','18, 22, 52, 62','tramwajowy',7423043.1978,5546172.5082);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','18, 22, 52, 62','tramwajowy',7423435.2016,5546369.6784);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rondo Grunwaldzkie','18, 22, 52, 62','tramwajowy',7423452.3066,5546373.6609);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rynek Dębnicki','112, 162','autobusowy',7423134.972,5546726.9495);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rynek Dębnicki','112, 162','autobusowy',7423156.8083,5546751.2202);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Konopnickiej','124, 144, 164, 169, 173, 179, 194, 304, 424, 469, 494, 608, 609','autobusowy',7423323.3736,5546843.7195);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Konopnickiej','124, 144, 164, 169, 173, 179, 194, 304, 424, 494, 608, 609','autobusowy',7423342.0175,5546845.2323);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bodzów','176','autobusowy',7418887.8762,5545334.0208);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bodzowska','176','autobusowy',7419227.6699,5545598.2026);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bodzowska','176','autobusowy',7419242.6963,5545611.2138);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Górka Pychowicka (nż)','112, 162, 176, 612','autobusowy',7419456.4542,5544799.9268);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Widłakowa (nż)','176','autobusowy',7419581.0738,5545187.2915);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Widłakowa (nż)','176','autobusowy',7419583.889,5545183.9119);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rodzinna','112, 162, 176, 612','autobusowy',7420165.7949,5544923.0175);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rodzinna','112, 162, 176, 612','autobusowy',7420175.7188,5544925.4282);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Pychowice','112, 162, 612','autobusowy',7420851.7088,5545102.0574);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Park Skały Twardowskiego (nż)','112, 162, 612','autobusowy',7421095.3961,5545224.2752);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Os. Robotnicze','112, 162, 612','autobusowy',7421849.0093,5546075.4549);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Zielińskiego (nż)','101, 126, 209, 219, 229, 239, 249, 259, 269, 609','autobusowy',7422020.4989,5546237.3688);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Zielińskiego (nż)','101, 126, 209, 219, 229, 239, 249, 259, 269, 609, 612','autobusowy',7422073.8673,5546148.9332);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Zielińskiego (nż)','112, 162','autobusowy',7422124.7651,5546230.2887);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Zielińskiego (nż)','112, 162','autobusowy',7422220.9401,5546272.7193);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Park Skały Twardowskiego (nż)','112, 162, 612','autobusowy',7421131.2962,5545239.2089);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Pychowice','112, 162, 612','autobusowy',7420770.5619,5545084.7914);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Os. Robotnicze','112, 162, 612','autobusowy',7421905.1729,5546100.1095);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Grota-Roweckiego','106, 136, 194, 494','autobusowy',7422640.5604,5544457.8586);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Grota-Roweckiego','106, 136, 194, 494, 578, 662','autobusowy',7422707.4449,5544469.7968);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Grota-Roweckiego','662','autobusowy',7422620.1674,5544524.3415);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kobierzyńska','194, 494, 662','autobusowy',7423048.7321,5544763.2295);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kobierzyńska','194, 494, 662','autobusowy',7423025.1611,5544778.3633);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kobierzyńska','18, 22, 52, 62','tramwajowy',7423055.5463,5544803.6232);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kobierzyńska','18, 22, 52, 62','tramwajowy',7423059.7308,5544820.5829);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Grota-Roweckiego','11, 17, 18, 52, 62','tramwajowy',7422641.7216,5544523.3627);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Grota-Roweckiego','11, 17, 18, 52, 62','tramwajowy',7422709.3404,5544491.9064);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Tor Kajakowy','203','autobusowy',7416098.923,5544666.2593);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Słomiana','194, 494, 662','autobusowy',7422939.5554,5545506.4423);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Słomiana','194, 494, 662','autobusowy',7422958.7995,5545509.5025);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kapelanka','194, 494, 662','autobusowy',7422836.9335,5545782.6857);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kapelanka','18, 22, 52, 62','tramwajowy',7422794.396,5545987.4263);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kapelanka','101, 126, 209, 219, 229, 239, 249, 259, 269, 609, 612','autobusowy',7422683.4386,5546032.5232);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kapelanka','101, 126, 194, 209, 219, 229, 239, 249, 259, 269, 494, 609, 612, 662','autobusowy',7422824.3058,5546054.6296);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Praska (nż)','112, 162','autobusowy',7422690.2984,5546507.4239);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Praska (nż)','112, 162','autobusowy',7422693.0574,5546514.9485);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kapelanka','18, 22, 52, 62','tramwajowy',7422794.9672,5545972.4006);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Słomiana','18, 22, 52, 62','tramwajowy',7422935.5281,5545580.0305);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Słomiana','18, 22, 52, 62','tramwajowy',7422966.6185,5545515.1746);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Brzyczyna','235','autobusowy',7418880.351,5537986.0226);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Brzyczyna','235','autobusowy',7418880.351,5537986.0226);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Nałkowskiej','175, 233, 475, 610','autobusowy',7419210.0178,5538891.228);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Nałkowskiej','175, 243, 475, 610','autobusowy',7419291.8885,5538902.3436);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Petrażyckiego (nż)','175, 243, 475, 610','autobusowy',7419621.1949,5539001.7442);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Żyzna (nż)','175, 243, 475, 610','autobusowy',7419970.8317,5539104.0873);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Żyzna (nż)','175, 243, 475, 610','autobusowy',7420040.5094,5539115.6186);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Warchałowskiego','156, 233','autobusowy',7418281.8594,5539921.9283);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Sapalskiego (nż)','156, 233','autobusowy',7418563.508,5539979.0499);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Warchałowskiego','156, 233','autobusowy',7418222.9639,5539991.5738);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Wrony','213, 223, 253, 263, 283, 293, 903','autobusowy',7417654.0044,5540499.6482);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Wrony','156, 233','autobusowy',7417774.5642,5540547.1899);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Libertów Droga do Sidziny (nż)','235','autobusowy',7419394.531,5537870.3707);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Wrony','156, 213, 223, 233, 253, 263, 283, 293, 903','autobusowy',7417734.6833,5540546.578);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Libertów Droga do Sidziny (nż)','235','autobusowy',7419402.7647,5537859.6792);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Nałkowskiej','233, 243','autobusowy',7419179.6172,5538849.3028);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Petrażyckiego (nż)','175, 243, 475, 610','autobusowy',7419582.0086,5538995.5457);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Tyniec Kamieniołom','112, 612','autobusowy',7415024.674,5542020.7775);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Janasówka (nż)','203','autobusowy',7415228.3654,5541082.9885);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Janasówka (nż)','203','autobusowy',7415253.5031,5541040.207);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Sidzina','156, 233','autobusowy',7419115.035,5539746.8848);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Baczyńskiego','156, 213, 223, 233, 253, 263, 283, 293, 903','autobusowy',7418957.9213,5541423.5613);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Fort Skotniki (nż)','116, 196','autobusowy',7418961.2623,5541772.5891);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skotniki','106, 156, 213, 223, 233, 253, 263, 283, 293, 903','autobusowy',7419279.4206,5541766.4533);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Fort Skotniki (nż)','116, 196','autobusowy',7419092.3131,5541772.1667);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Babińskiego','106, 204, 293','autobusowy',7419811.0348,5541809.7562);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skotniki','106, 116, 196','autobusowy',7419261.7437,5541844.7003);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Babińskiego','156, 204, 213, 223, 233, 253, 263, 283, 903','autobusowy',7419797.1132,5541856.7973);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Sidzina','175, 233, 475, 610','autobusowy',7419115.035,5539746.8848);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kozienicka','116, 196','autobusowy',7418192.7881,5541722.1894);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kozienicka','116','autobusowy',7418226.7711,5541755.0437);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Orszy-Broniewskiego','116, 196','autobusowy',7418560.3461,5541763.0916);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Baczyńskiego','156, 213, 223, 233, 253, 263, 283, 293, 903','autobusowy',7418928.0333,5541376.8465);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skotniki','106, 156, 213, 223, 233, 253, 263, 283, 293, 903','autobusowy',7419387.7859,5541730.6711);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skotniki Kościół','106, 116, 196','autobusowy',7419328.2685,5542006.2234);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Babińskiego','106, 156, 213, 223, 233, 253, 263, 283, 293, 903','autobusowy',7419707.8695,5541805.0711);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Orszy-Broniewskiego','116, 196','autobusowy',7418617.0403,5541677.0188);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Sapalskiego (nż)','156, 233','autobusowy',7418562.5412,5539972.0563);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bolesława Śmiałego','112, 203, 612','autobusowy',7415242.4592,5543129.9962);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bolesława Śmiałego','112, 203, 612','autobusowy',7415287.6518,5543123.163);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Tyniecka Autostrada (nż)','112, 203, 612','autobusowy',7415949.7666,5543494.7478);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kolna (nż)','112, 203, 612','autobusowy',7416319.0251,5543742.4922);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kolna (nż)','203','autobusowy',7416356.0739,5543889.0895);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kolna (nż)','112, 203, 612','autobusowy',7416525.0854,5543848.9637);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bagienna','162','autobusowy',7416922.1892,5542198.1641);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bagienna','162','autobusowy',7416945.7709,5542151.6326);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bogucianka','112, 203, 612','autobusowy',7414851.0819,5542240.4595);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bogucianka','112, 203, 612','autobusowy',7414866.5305,5542202.0572);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Tyniec','112, 203, 612','autobusowy',7414644.9247,5542800.0742);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Tyniec','112, 203, 612','autobusowy',7414641.0138,5542829.0602);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze','162','autobusowy',7417088.3401,5543164.7443);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze','162','autobusowy',7417057.3975,5543170.7854);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Podgórki Tynieckie','116, 162','autobusowy',7417171.2918,5541770.1377);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Tyniecka Autostrada (nż)','112, 203, 612','autobusowy',7415994.3738,5543519.3005);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skośna','106, 136, 194, 494, 608','autobusowy',7421043.4227,5542251.5542);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skośna','106, 136, 194, 494, 608','autobusowy',7421074.0077,5542303.3871);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Brücknera','106, 116, 196','autobusowy',7419443.2868,5542422.8751);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lubostroń (nż)','106, 136, 194, 494, 608','autobusowy',7421285.6234,5542605.8543);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Konopczyńskiego','196, 496','autobusowy',7420924.4146,5542668.7955);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Piltza','196, 496','autobusowy',7420456.3433,5542707.9835);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Piltza','196, 496','autobusowy',7420642.7553,5542710.7816);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lubostroń (nż)','196, 496','autobusowy',7421348.1628,5542725.299);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lubostroń (nż)','196, 496','autobusowy',7421310.9851,5542726.9573);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skotniki Szkoła','116, 196, 203, 476, 496','autobusowy',7419471.3029,5542817.92);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skotniki Szkoła','106, 116, 196','autobusowy',7419413.3716,5542845.6003);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Mochnaniec (nż)','116, 196, 203, 476, 496','autobusowy',7419842.4021,5542866.6417);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Mochnaniec (nż)','116, 196, 203, 476, 496','autobusowy',7419837.4673,5542872.1664);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Skotniki Szkoła','203, 476, 496','autobusowy',7419451.5815,5542912.6611);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Torfowa','106, 136, 194, 196, 494, 496, 608','autobusowy',7421541.7993,5542986.658);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Torfowa','106, 136, 194, 196, 494, 496, 608','autobusowy',7421627.9652,5543104.9812);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Chmieleniec','578, 662','autobusowy',7420994.979,5543244.4304);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Chmieleniec','578, 662','autobusowy',7421082.9326,5543318.1108);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Zachodnia','106, 136, 194, 196, 494, 496, 608','autobusowy',7421914.3516,5543560.4476);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kampus UJ','662','autobusowy',7421293.6175,5543652.5178);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Zachodnia','106, 136, 194, 196, 494, 496, 608','autobusowy',7421982.0567,5543677.0429);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kampus UJ','662','autobusowy',7421361.0883,5543742.5224);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Czerwone Maki P+R','116, 156, 196, 203, 204, 213, 223, 233, 253, 263, 283, 476, 496, 903','autobusowy',7420353.8503,5542945.0047);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Czerwone Maki P+R','578','autobusowy',7420479.9417,5542969.8299);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Czerwone Maki P+R','116, 156, 203, 204, 213, 223, 233, 253, 263, 283, 476, 578, 662, 903','autobusowy',7420397.1142,5543049.1515);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Czerwone Maki P+R','196, 496','autobusowy',7420393.6213,5543021.5042);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bunscha','156, 204, 213, 223, 233, 253, 263, 283, 903','autobusowy',7420007.4572,5542433.0013);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Winnicka (nż)','203, 476, 496','autobusowy',7419181.5351,5543233.6572);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Winnicka (nż)','203, 476, 496','autobusowy',7419105.7922,5543263.2784);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lubostroń (nż)','106, 136, 194, 494, 608','autobusowy',7421352.8074,5542704.7625);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Brücknera','106, 116, 196','autobusowy',7419427.0531,5542358.7099);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Bunscha','156, 204, 213, 223, 233, 253, 263, 283, 903','autobusowy',7419948.9567,5542336.6495);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Piltza','196, 496','autobusowy',7420593.2263,5542701.2811);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Konopczyńskiego','196, 496','autobusowy',7420927.6045,5542676.0904);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kampus UJ','11, 17, 18, 52, 62','tramwajowy',7421287.3229,5543672.8563);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kampus UJ','11, 17, 18, 52, 62','tramwajowy',7421324.9126,5543743.6098);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Chmieleniec','11, 17, 18, 52, 62','tramwajowy',7420996.1329,5543269.2202);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Czerwone Maki P+R','11, 17, 18, 52, 62','tramwajowy',7420417.8807,5543062.3033);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Chmieleniec','11, 17, 18, 52, 62','tramwajowy',7421041.08,5543318.3938);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Krokusowa','196, 496, 608','autobusowy',7422580.5863,5543674.6998);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Krokusowa','196, 496, 608','autobusowy',7422576.0598,5543758.1958);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze Kapliczka (nż)','112, 203, 612','autobusowy',7417227.5002,5544052.9861);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Wały Wiślane (nż)','112, 203, 612','autobusowy',7417402.2904,5544118.0351);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ślaskiego (nż)','162','autobusowy',7417643.6804,5543886.714);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ślaskiego (nż)','162','autobusowy',7417684.182,5543910.6762);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Fort Bodzów (nż)','112, 162, 176, 612','autobusowy',7418687.1046,5544544.9046);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze Kapliczka (nż)','112, 203, 612','autobusowy',7417218.3379,5544053.684);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze OSP','162, 176, 476, 496','autobusowy',7417759.7947,5544242.3549);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze OSP','162','autobusowy',7417759.1977,5544245.4788);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Dąbrowa','162','autobusowy',7417526.3902,5543781.5024);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Dąbrowa','162','autobusowy',7417408.2695,5543650.6089);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze Szkoła','112, 162, 176, 203, 476, 496, 612','autobusowy',7418009.6588,5544292.4769);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Kostrze Szkoła','112, 162, 176, 203, 476, 496, 612','autobusowy',7417954.201,5544288.3203);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Fort Winnica (nż)','203, 476, 496','autobusowy',7418771.2868,5543542.108);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Fort Winnica (nż)','203, 476, 496','autobusowy',7418708.1313,5543630.9478);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Wały Wiślane (nż)','112, 203, 612','autobusowy',7417457.8865,5544140.3167);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Fort Bodzów (nż)','112, 162, 176, 612','autobusowy',7418687.1046,5544544.9046);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ruczaj','578, 662','autobusowy',7421548.9704,5543970.5932);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ruczaj','578, 662','autobusowy',7421658.808,5544008.2537);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Norymberska','578, 662','autobusowy',7422170.6549,5544321.0548);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rostworowskiego','106, 136, 194, 196, 494, 496, 608','autobusowy',7422207.7912,5544090.3575);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rostworowskiego','196, 496, 608','autobusowy',7422254.9298,5544049.8488);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Rostworowskiego','106, 136, 194, 494','autobusowy',7422282.0228,5544119.3149);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Norymberska','578, 662','autobusowy',7422054.6616,5544278.2452);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ruczaj','11, 17, 18, 52, 62','tramwajowy',7421625.0716,5544028.9932);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ruczaj','11, 17, 18, 52, 62','tramwajowy',7421556.8534,5543990.1675);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Norymberska','11, 17, 18, 52, 62','tramwajowy',7422066.1974,5544302.7729);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Norymberska','11, 17, 18, 52, 62','tramwajowy',7422131.624,5544337.4184);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lipińskiego','106, 136, 194, 494, 662','autobusowy',7422963.2022,5544366.3287);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lipińskiego','106, 136, 194, 494, 578, 662','autobusowy',7422971.5142,5544386.2325);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lipińskiego','11, 17, 18, 52, 62','tramwajowy',7422968.9757,5544399.0617);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Lipińskiego','11, 17, 18, 52, 62','tramwajowy',7422973.9043,5544392.9838);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ludwinów','144, 164, 169, 173, 179, 469, 608, 610','autobusowy',7423706.0616,5545758.3254);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (8,'Ludwinów','144, 164, 169, 173, 179, 608, 610','autobusowy',7423728.588,5545785.7033);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Góra Borkowska (nż)','175, 191, 204, 214, 215, 225, 235, 243, 245, 254, 255, 265, 275, 285, 293, 475, 610, 915','autobusowy',7422964.7454,5541801.7688);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Polana Żywiecka (nż)','121, 151','autobusowy',7421814.9911,5542217.5491);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łuczyńskiego (nż)','121, 151','autobusowy',7422123.233,5542438.7686);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Borek Fałęcki','204, 610','autobusowy',7423068.0955,5542229.2267);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Borek Fałęcki','121, 151, 175, 191, 204, 214, 215, 225, 235, 243, 245, 254, 255, 265, 275, 285, 293, 475, 610','autobusowy',7423061.6618,5542250.4547);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Borek Fałęcki','915','autobusowy',7423143.4023,5542276.7582);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Borek Fałęcki','915','autobusowy',7423116.8654,5542290.8214);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Centrum JP II','224','autobusowy',7423833.1718,5542338.3264);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Żywiecka','121, 151','autobusowy',7422577.5034,5542727.3075);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Kościuszkowców','121, 151','autobusowy',7423220.5541,5542763.3295);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Rynek Fałęcki','121, 151','autobusowy',7422910.8574,5542959.5546);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Sanktuarium Bożego Miłosierdzia','10, 11, 50','tramwajowy',7423769.1021,5542939.0434);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki SKA','915','autobusowy',7423448.1298,5543199.4721);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki SKA','50','tramwajowy',7423446.3774,5543227.3072);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki SKA','196, 496, 608','autobusowy',7423481.8463,5543322.0222);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki SKA','196, 496, 608, 915','autobusowy',7423535.4804,5543394.0075);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Kościuszkowców','19, 22, 50, 8','tramwajowy',7423306.608,5542821.1656);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Kościuszkowców','19, 22, 50, 8','tramwajowy',7423269.988,5542711.5621);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Solvay','19, 22, 50, 8','tramwajowy',7423160.3782,5542590.7684);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Solvay','19, 22, 50, 8','tramwajowy',7423160.9453,5542595.3212);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Borek Fałęcki','19, 22, 50, 8','tramwajowy',7423099.5683,5542429.2299);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki ZUS (nż)','10, 11, 19, 22, 8','tramwajowy',7423612.3525,5543698.4877);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki SKA','10, 11, 19, 22, 8','tramwajowy',7423513.7723,5543424.686);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki SKA','10, 11, 50','tramwajowy',7423532.1877,5543313.9615);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Łagiewniki SKA','19, 22, 8','tramwajowy',7423509.3965,5543424.4147);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Sanktuarium Bożego Miłosierdzia','10, 11, 50','tramwajowy',7423774.1501,5542941.1964);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Myślenicka (nż)','204, 610','autobusowy',7424279.3753,5541595.3745);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Millana (nż)','135','autobusowy',7424166.42,5542894.6938);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Millana (nż)','135','autobusowy',7424196.3368,5542911.8463);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Fredry','133, 135, 433','autobusowy',7424241.2062,5543271.74);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Fredry','133, 135, 433','autobusowy',7424234.8282,5543347.807);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Sucha','133, 135, 433','autobusowy',7424200.6569,5543647.7483);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Sucha','133, 135, 433','autobusowy',7424197.0677,5543687.8454);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Turowicza','135, 224','autobusowy',7424346.6769,5542624.9478);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Turowicza','10, 11, 50','tramwajowy',7424347.4563,5542629.3864);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Turowicza','10, 11, 50','tramwajowy',7424344.6682,5542634.9877);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (9,'Połomskiego (nż)','133, 433','autobusowy',7424356.2237,5543103.1439);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Libertów Świetlista','255','autobusowy',7422407.6228,5538758.3739);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Ważewskiego','235, 245, 255, 275, 285','autobusowy',7421970.0145,5539086.2048);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Chałubińskiego (nż)','265','autobusowy',7423762.9952,5539085.6761);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Ważewskiego','235, 245, 255, 275, 285','autobusowy',7422033.4626,5539182.7287);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Opatkowice Zadworze','175','autobusowy',7422518.7676,5539301.8434);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Opatkowice Zadworze','175','autobusowy',7422511.6429,5539329.9788);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Taklińskiego (nż)','175, 243, 475, 610','autobusowy',7421640.2478,5539457.3264);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Taklińskiego (nż)','175, 243, 475, 610','autobusowy',7421686.299,5539462.5496);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Pytlasińskiego','265','autobusowy',7424013.9663,5539480.3519);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Pytlasińskiego','265','autobusowy',7423994.833,5539400.5307);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Opatkowice','235, 245, 255, 275, 285','autobusowy',7422120.857,5539481.2516);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Podgaje','175, 243, 475, 610','autobusowy',7421303.7862,5539437.4455);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Podgaje','175, 243, 475, 610','autobusowy',7421247.6153,5539436.7125);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Smoleńskiego','175','autobusowy',7422526.2008,5538927.5248);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Poronińska (nż)','175','autobusowy',7422426.5096,5539528.6604);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Poronińska (nż)','175','autobusowy',7422330.942,5539536.2729);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Petrażyckiego Osiedle (nż)','175, 243, 475, 610','autobusowy',7420852.9522,5539259.3077);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Petrażyckiego Osiedle (nż)','175, 243, 475, 610','autobusowy',7420783.5745,5539258.1069);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Libertowska (nż)','175, 243, 475, 610','autobusowy',7420401.4405,5539197.1302);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kłuszyńska','175, 243, 475, 610','autobusowy',7422070.3742,5539575.7604);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kłuszyńska','175, 243, 475, 610','autobusowy',7422117.1768,5539593.324);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Chałubińskiego (nż)','265','autobusowy',7423747.7943,5539065.8691);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Libertowska (nż)','175, 243, 475, 610','autobusowy',7420380.3025,5539184.095);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Opatkowice','175, 235, 243, 245, 255, 275, 285, 475, 610','autobusowy',7422198.9352,5539637.5235);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Chorzowska (nż)','121','autobusowy',7422168.4336,5540461.3669);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zagaje (nż)','121','autobusowy',7422176.4509,5540816.1075);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zawiszy','121, 191','autobusowy',7422107.1592,5540923.0147);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zawiszy','121, 191','autobusowy',7421997.0993,5540952.9811);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Os. Kliny','121, 191','autobusowy',7422050.5929,5541046.8688);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Forteczna','121, 191','autobusowy',7421629.1461,5541087.4977);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Judyma Szkoła','121, 191','autobusowy',7422348.2776,5541079.9257);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Forteczna','121, 191','autobusowy',7421576.3402,5541109.7393);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kliny Zacisze','136, 151, 191, 194, 494, 608','autobusowy',7421167.421,5541138.7636);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kliny Zacisze','136, 151, 191, 194, 494, 608','autobusowy',7421208.5581,5541186.215);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Borkowska','121, 136, 151, 194, 494, 608','autobusowy',7421565.1096,5541498.6904);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Borkowska','121, 136, 151, 194, 494, 608','autobusowy',7421566.9124,5541538.5995);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zawiła (nż)','136, 194, 204, 293, 494, 608','autobusowy',7421241.2601,5541713.6845);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zawiła (nż)','136, 194, 204, 293, 494, 608','autobusowy',7421215.8423,5541720.8437);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kobierzyn','106, 204, 293','autobusowy',7420567.4062,5541805.5019);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kobierzyn','106, 204, 293','autobusowy',7420568.5465,5541824.396);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Las Borkowski','121, 151, 204, 293','autobusowy',7421626.9458,5541883.4582);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Las Borkowski','121, 151, 204, 293','autobusowy',7421672.7855,5541944.3043);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Cmentarz Borek Fałęcki (nż)','204, 293','autobusowy',7422209.989,5541980.7543);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Komuny Paryskiej','136, 194, 204, 293, 494, 608','autobusowy',7420942.9008,5541769.2477);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Komuny Paryskiej','136, 194, 204, 293, 494, 608','autobusowy',7420892.084,5541809.0432);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Os. Pod Fortem','136, 151, 191, 194, 494, 608','autobusowy',7420935.5763,5540854.5082);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kliny Poranne','121','autobusowy',7421967.1648,5540477.6409);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Cmentarz Borek Fałęcki (nż)','121, 151, 204, 293','autobusowy',7422143.8111,5542044.3437);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Merkuriusza Polskiego','135, 155, 214, 215, 225, 254, 265, 915','autobusowy',7424010.4518,5540148.5053);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Park Zdrojowy','155, 214, 215, 225, 254, 265, 915','autobusowy',7423727.8289,5540168.6472);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Merkuriusza Polskiego','155, 214, 215, 225, 254, 265, 915','autobusowy',7423922.2187,5540187.1327);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Park Zdrojowy','155, 214, 215, 225, 254, 265, 915','autobusowy',7423630.0978,5540199.8503);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Opatkowice Wiadukt (nż)','175, 235, 243, 245, 255, 275, 285, 475, 610','autobusowy',7422447.7097,5540364.7686);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Opatkowice Wiadukt (nż)','175, 235, 243, 245, 255, 275, 285, 475, 610','autobusowy',7422455.8705,5540413.3738);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Wilga (nż)','155, 214, 215, 225, 254, 265, 915','autobusowy',7423330.5111,5540402.5769);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Wilga (nż)','155, 214, 215, 225, 254, 265, 915','autobusowy',7423309.6775,5540425.0115);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kąpielowa (nż)','175, 235, 243, 245, 255, 275, 285, 475, 610','autobusowy',7422538.0574,5540647.1253);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kąpielowa (nż)','175, 235, 243, 245, 255, 275, 285, 475, 610','autobusowy',7422566.6637,5540696.4365);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kąpielowa (nż)','214, 215, 225, 254, 265, 915','autobusowy',7422698.46,5540845.5989);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kąpielowa (nż)','214, 215, 225, 254, 265, 915','autobusowy',7422681.4126,5540866.7579);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Swoszowice SKA','254','autobusowy',7423122.478,5540932.6102);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Swoszowice SKA','155, 254','autobusowy',7423122.7332,5540950.4049);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Judyma','175, 191, 214, 215, 225, 235, 243, 245, 254, 255, 265, 275, 285, 475, 610, 915','autobusowy',7422709.4747,5541137.112);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Judyma','175, 191, 214, 215, 225, 235, 243, 245, 254, 255, 265, 275, 285, 475, 610, 915','autobusowy',7422763.7325,5541245.2342);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Góra Borkowska (nż)','175, 191, 214, 215, 225, 235, 243, 245, 254, 255, 265, 275, 285, 475, 610, 915','autobusowy',7422913.5323,5541710.2869);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Góra Borkowska (nż)','204, 610','autobusowy',7422995.4949,5541766.3975);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Góra Borkowska (nż)','121, 151, 204, 293','autobusowy',7422910.3391,5541797.3227);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Jugowicka','204, 610','autobusowy',7423333.0727,5541800.0474);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Jugowicka','204, 610','autobusowy',7423354.4037,5541802.7458);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zbydniowice','215, 225, 915','autobusowy',7424477.67,5537876.5235);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Ukraina (nż)','135, 215, 225, 254, 915','autobusowy',7424423.7548,5538225.46);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Ukraina (nż)','135, 215, 225, 254, 915','autobusowy',7424385.4936,5538259.3707);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Wróblowice Szkoła','135, 215, 225, 915','autobusowy',7424316.0337,5539183.6337);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Wróblowice Szkoła','135, 215, 225, 915','autobusowy',7424317.7643,5539219.8732);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Sawiczewskich','135, 215, 225, 915','autobusowy',7424380.0931,5539799.7736);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Wróblowice','254','autobusowy',7424308.5898,5538757.6931);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Sawiczewskich','214, 254','autobusowy',7424442.3673,5539837.0509);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Swoszowice Poczta','265','autobusowy',7424091.6608,5539882.0493);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Swoszowice Poczta','135, 155, 214, 215, 225, 254, 265, 915','autobusowy',7424162.3136,5539938.6717);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Wróblowice','135, 215, 225, 915','autobusowy',7424294.024,5538798.0559);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Wróblowice','135, 215, 225, 254, 915','autobusowy',7424290.855,5538670.0645);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zbydniowice','135, 215, 225, 254, 915','autobusowy',7424485.3463,5537963.1817);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zbydniowice','135, 254','autobusowy',7424503.9776,5537910.6374);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Aleksandrowicza (nż)','254','autobusowy',7424679.5393,5538672.6031);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Cmentarz Wróblowice','254','autobusowy',7425037.1687,5538701.2997);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Cmentarz Wróblowice','254','autobusowy',7425053.4925,5538699.0694);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kenara (nż)','254','autobusowy',7425403.7022,5538937.356);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kenara (nż)','254','autobusowy',7425421.2817,5538937.7791);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zbydniowicka','135, 254','autobusowy',7425443.3427,5537985.6055);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Landaua','254','autobusowy',7425587.7424,5539649.7299);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Landaua','214, 254','autobusowy',7425613.032,5539611.558);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Landaua','214','autobusowy',7425688.2769,5539607.1778);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Golkowice Pętla','254','autobusowy',7425880.4806,5538018.0384);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Rajsko','214','autobusowy',7426029.3328,5539531.2709);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Rajsko','214','autobusowy',7426116.123,5539427.7355);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Zbydniowicka','135, 254','autobusowy',7425478.022,5537992.7992);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Aleksandrowicza (nż)','254','autobusowy',7424635.3142,5538685.2379);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Geologów (nż)','214','autobusowy',7426684.4196,5539289.3444);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Geologów (nż)','214','autobusowy',7426768.8154,5539256.1551);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Malinowskiego (nż)','214','autobusowy',7427068.7128,5539157.406);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Malinowskiego (nż)','214','autobusowy',7427154.1464,5539142.2293);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Pod Lipą (nż)','214','autobusowy',7427311.4168,5538166.3226);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Pod Lipą (nż)','214','autobusowy',7427318.5754,5538175.7921);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Golkowice Sklep','214, 254','autobusowy',7427383.7959,5537911.4989);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Soboniowice','214','autobusowy',7427478.1387,5538591.1072);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Drużbackiej','107, 214','autobusowy',7427521.1957,5538948.1538);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Drużbackiej','107, 214','autobusowy',7427521.5102,5538918.3379);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Soboniowice','214','autobusowy',7427556.0226,5538717.3106);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Soboniowice','107','autobusowy',7427567.1042,5538645.5241);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Golkowice Granica (nż)','214, 254','autobusowy',7427903.1978,5537980.4708);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Krzemieniecka (nż)','107','autobusowy',7427937.4717,5539058.0103);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Krzemieniecka (nż)','107','autobusowy',7427980.7877,5539073.558);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Żelazowskiego (nż)','107','autobusowy',7428299.463,5539636.8214);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Żelazowskiego (nż)','107','autobusowy',7428309.281,5539609.437);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Barycz (nż)','107','autobusowy',7428466.72,5539277.2944);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Barycz (nż)','107','autobusowy',7428466.0141,5539224.355);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Warszewicza (nż)','135, 155','autobusowy',7424424.9124,5540822.2091);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Warszewicza (nż)','135, 155','autobusowy',7424433.2099,5540708.8505);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Swoszowice Szkoła','135, 155','autobusowy',7424429.7241,5540324.123);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Sawiczewskich','135, 155, 214, 215, 225, 254, 265, 915','autobusowy',7424431.9686,5539979.5836);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Swoszowice Szkoła','135, 155, 214, 215, 225, 254, 265, 915','autobusowy',7424481.2686,5540292.4724);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Fort Swoszowice (nż)','214, 254','autobusowy',7425162.9297,5539735.7323);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Fort Swoszowice (nż)','214, 254','autobusowy',7425129.0423,5539722.8566);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Niebieska Autostrada (nż)','107','autobusowy',7427498.6435,5540808.0185);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kosocice','107','autobusowy',7427527.1737,5540261.0104);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Kosocice','107','autobusowy',7427528.472,5540282.7954);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Szczegów','107','autobusowy',7427976.2687,5540200.4535);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Szczegów','107','autobusowy',7428035.3707,5540142.5952);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (10,'Niebieska Autostrada (nż)','107','autobusowy',7427485.55,5540873.7147);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Myślenicka (nż)','135, 155','autobusowy',7424223.3228,5541479.5875);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Połomskiego (nż)','133, 433','autobusowy',7424432.4653,5543061.1318);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Swoszowice Autostrada (nż)','135, 155','autobusowy',7424175.9578,5541025.1764);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Swoszowice Autostrada (nż)','135, 155','autobusowy',7424108.7005,5541075.7409);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Myślenicka (nż)','135, 155, 204, 610','autobusowy',7424402.9248,5541581.6168);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Halszki','135, 155, 204, 610','autobusowy',7424568.2725,5541598.4206);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Halszki','174, 179','autobusowy',7424668.3965,5541565.5318);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Wysłouchów','133, 433','autobusowy',7424976.5366,5541852.3232);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Wysłouchów','133, 433','autobusowy',7425011.493,5541840.0426);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Stojałowskiego','174, 179','autobusowy',7425064.2528,5541532.0622);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Stojałowskiego','174, 179','autobusowy',7425162.1523,5541503.8858);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Halszki','174, 179','autobusowy',7424703.5932,5541575.3825);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Os. Kurdwanów','174, 179','autobusowy',7425426.7891,5541442.9097);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Bojki','133, 433','autobusowy',7425541.4829,5541828.6493);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Bojki','133, 433','autobusowy',7425642.9168,5541797.0954);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów Szkoła','133, 433','autobusowy',7425842.8519,5541506.217);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów Szkoła','133, 433','autobusowy',7425913.8096,5541561.8563);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Cechowa (nż)','133, 433','autobusowy',7426240.1299,5541690.0638);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Cechowa (nż)','133, 433','autobusowy',7426365.4559,5541716.8177);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Łużycka (nż)','107, 469, 904','autobusowy',7426477.6899,5541813.6118);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Łużycka (nż)','107, 169, 904','autobusowy',7426503.5605,5541792.0105);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Piaski Wielkie','107, 133, 433, 469, 904','autobusowy',7427021.6728,5541597.8284);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Piaski Wielkie','107, 133, 169, 433, 904','autobusowy',7427039.586,5541602.3678);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Piaski Wielkie','169, 433','autobusowy',7427098.8068,5541560.4039);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Przy Kuźni (nż)','133, 904','autobusowy',7427617.6911,5541351.2529);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Hallera (nż)','133, 904','autobusowy',7427850.0847,5541321.4229);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Hallera (nż)','133, 904','autobusowy',7427972.4782,5541279.3978);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Przy Kuźni (nż)','133, 904','autobusowy',7427492.6375,5541360.6183);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Hala Sportowa Piaski Wielkie (nż)','107','autobusowy',7427329.2467,5541223.3383);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Hala Sportowa Piaski Wielkie (nż)','107','autobusowy',7427314.5167,5541231.5471);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','11, 50','tramwajowy',7424592.4683,5542518.0305);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Turowicza','133, 433','autobusowy',7424440.5372,5542723.7392);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Turowicza','133, 135, 224, 433','autobusowy',7424467.7719,5542570.9569);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','133, 135, 224, 433','autobusowy',7424689.5499,5542530.014);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','133, 135, 155, 174, 179, 204, 433, 610','autobusowy',7424725.9911,5542450.2995);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','174, 179','autobusowy',7424768.4076,5542596.9849);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Witosa','155, 204, 224, 610','autobusowy',7425259.8757,5542326.693);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Witosa','155, 204, 224, 610','autobusowy',7425143.6585,5542371.5871);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Bujaka','133, 135, 155, 174, 179, 204, 433, 610','autobusowy',7424657.8702,5542096.8478);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Bujaka','133, 135, 155, 174, 179, 204, 433, 610','autobusowy',7424628.6311,5542015.9429);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','155, 204, 224, 610','autobusowy',7424793.0839,5542470.6042);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Witosa','11, 24, 50','tramwajowy',7425160.3517,5542324.7447);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','10, 11, 50','tramwajowy',7424611.0705,5542515.544);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Witosa','11, 24, 50','tramwajowy',7425236.6898,5542314.1126);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','11, 24, 50','tramwajowy',7424777.2589,5542456.4764);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Kurdwanów P+R','11, 50','tramwajowy',7424778.7391,5542459.7928);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Nowosądecka','155, 204, 224, 610','autobusowy',7425802.3833,5542466.9908);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Nowosądecka','107, 155, 164, 169, 610','autobusowy',7425842.7525,5542493.7968);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Nowosądecka','164, 204, 224, 904','autobusowy',7425939.7461,5542494.4577);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Tuchowska','107, 469, 904','autobusowy',7425939.0709,5542414.4863);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Tuchowska','107, 169','autobusowy',7425971.8934,5542398.3481);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Piaski Nowe','164, 204, 224, 904','autobusowy',7426186.1214,5542630.3293);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Bochenka (nż)','107, 169, 904','autobusowy',7426256.2782,5542066.4955);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Bochenka (nż)','107, 469, 904','autobusowy',7426275.125,5542029.5275);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Piaski Nowe','204, 224, 904','autobusowy',7426316.1458,5542635.4366);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Prokocim UJ','153','autobusowy',7427813.9752,5542004.6869);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Karpińskiego','107, 155, 164, 469, 610','autobusowy',7425715.2099,5542750.7456);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Piaski Nowe','11, 24, 50','tramwajowy',7426296.2646,5542649.1699);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Nowosądecka','11, 24, 50','tramwajowy',7425795.8581,5542430.5948);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Nowosądecka','11, 24, 50','tramwajowy',7425799.3421,5542428.5443);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Piaski Nowe','11, 24, 50','tramwajowy',7426298.361,5542645.2477);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Malborska Szkoła','155, 169, 469','autobusowy',7425798.754,5543384.9856);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Malborska Szkoła','155, 169','autobusowy',7425864.5417,5543410.5497);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Sułkowskiego','155, 169','autobusowy',7426107.7313,5543546.9059);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Sułkowskiego','155, 169, 469','autobusowy',7426142.6208,5543572.0098);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Puszkarska','164, 610','autobusowy',7424663.6706,5543967.149);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Puszkarska','164, 610','autobusowy',7424714.8134,5543848.1821);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Beskidzka','174, 179','autobusowy',7424867.4527,5542994.4999);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Beskidzka','174, 179','autobusowy',7424874.9276,5543021.5376);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Bonarka','144, 155, 169, 173, 174, 179, 469','autobusowy',7425061.8151,5544140.6596);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Pszenna','174, 179','autobusowy',7425148.6017,5543197.4701);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Pszenna','174, 179','autobusowy',7425219.5871,5543189.3595);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Zajezdnia Wola Duchacka','164, 610','autobusowy',7425381.8285,5543594.122);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Sławka (nż)','174, 179','autobusowy',7425464.9002,5543888.4172);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Sławka (nż)','174, 179','autobusowy',7425490.0251,5543793.6254);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Zajezdnia Wola Duchacka','107, 164, 169, 174, 179, 610','autobusowy',7425498.7995,5543533.0922);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Wola Duchacka','107, 164, 169, 174, 179, 610','autobusowy',7425493.9271,5543311.5713);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Zajezdnia Wola Duchacka','174, 179','autobusowy',7425518.9269,5543635.3749);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Wola Duchacka','107, 155, 164, 469, 610','autobusowy',7425515.9813,5543134.8392);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (11,'Wola Duchacka','155, 169','autobusowy',7425624.0914,5543281.3967);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Słona Woda','133, 904','autobusowy',7428558.2288,5541278.9013);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Słona Woda','133, 904','autobusowy',7428594.2485,5541302.5599);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Czerwiakowskiego','144, 195','autobusowy',7429041.7471,5541809.7552);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Kosocicka (nż)','133, 904','autobusowy',7429093.435,5541370.7965);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Rżąka','144, 195','autobusowy',7429119.6387,5541584.9153);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Kosocicka (nż)','133, 904','autobusowy',7429150.7529,5541395.067);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Węzeł Wielicki (nż)','133, 904','autobusowy',7429452.0509,5541539.706);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Węzeł Wielicki (nż)','204, 224, 244, 274, 904','autobusowy',7429505.828,5541643.895);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Węzeł Wielicki (nż)','503','autobusowy',7429539.5102,5541555.6862);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Węzeł Wielicki (nż)','133, 503','autobusowy',7429593.2947,5541633.2903);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Aleksandry','503','autobusowy',7429623.3656,5541843.2445);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Węzeł Wielicki (nż)','204, 224, 244, 274, 904','autobusowy',7429627.2333,5541526.2796);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Aleksandry','503','autobusowy',7429643.7516,5541807.0474);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim UJ','153','autobusowy',7427789.6297,5542059.9664);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Wydział Farmaceutyczny UJ','153','autobusowy',7427836.8911,5542226.5204);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Szpital','144, 204, 224, 274, 301, 304, 503, 513','autobusowy',7428177.2175,5542497.2621);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Szpital','144, 173, 204, 224, 274, 301, 304, 503, 513','autobusowy',7428214.9722,5542511.7733);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Szpital','13, 3, 49, 69, 9','tramwajowy',7428256.769,5542506.9865);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Szpital','133, 153, 163, 173, 195, 244, 669','autobusowy',7428340.8651,5542486.7284);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Szpital','13, 3, 49, 69, 9','tramwajowy',7428344.3421,5542521.6105);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Szpital Uniwersytecki / Instytut Pediatr','153, 163, 204, 513','autobusowy',7428332.2269,5542044.4516);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Szpital Uniwersytecki / Instytut Pediatr','153, 163, 204, 513','autobusowy',7428344.8571,5542029.3769);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Szpital','133, 153, 163, 195, 244, 669','autobusowy',7428424.1351,5542570.9348);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Młodzieży (nż)','143','autobusowy',7428482.7507,5543439.4753);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Młodzieży (nż)','143','autobusowy',7428484.1522,5543442.46);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Kabel','11, 13, 24, 3, 49, 50, 69, 9','tramwajowy',7426718.6224,5543882.4644);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Dauna','204, 224, 904','autobusowy',7426714.6657,5542980.2617);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Dauna','11, 24, 50','tramwajowy',7426731.4942,5542968.6852);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Dauna','204, 224, 904','autobusowy',7426743.9932,5543065.0693);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','204, 224, 904','autobusowy',7426837.3013,5543573.3784);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','904','autobusowy',7426844.1575,5543534.9074);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','11, 24, 50','tramwajowy',7426859.3523,5543540.2619);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','144, 173, 204, 224, 274, 301, 304, 503, 513, 669','autobusowy',7426952.9408,5543513.4);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','13, 3, 49, 69, 9','tramwajowy',7427032.9418,5543488.6159);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','13, 3, 49, 69, 9','tramwajowy',7427039.8962,5543478.2872);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','144, 173, 274, 301, 304, 503, 513, 669','autobusowy',7427055.3557,5543455.7178);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','143','autobusowy',7427103.2425,5543619.9214);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','143','autobusowy',7427133.7378,5543643.7565);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Wlotowa','144, 173, 204, 224, 274, 503, 513, 669','autobusowy',7427483.1414,5543016.4144);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Wlotowa','144, 173, 204, 224, 274, 503, 513, 669','autobusowy',7427507.263,5543035.2209);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prosta','143','autobusowy',7427716.4646,5543724.8522);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim','13, 3, 49, 69, 9','tramwajowy',7427699.026,5542857.4297);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prosta','143','autobusowy',7427812.0124,5543699.7587);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Rynek','143','autobusowy',7428104.9664,5543544.3125);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim Rynek','143','autobusowy',7428194.4232,5543486.8263);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanowska','11, 24, 50','tramwajowy',7426871.6763,5543545.3218);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Dauna','11, 24, 50','tramwajowy',7426726.3686,5542955.5179);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Wlotowa','13, 3, 49, 69, 9','tramwajowy',7427468.8889,5543086.02);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Prokocim','13, 3, 49, 69, 9','tramwajowy',7427690.8216,5542870.889);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Wlotowa','13, 3, 49, 69, 9','tramwajowy',7427487.3792,5543064.7456);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Wielicka Granica Miasta','204, 224, 244, 274, 301, 904','autobusowy',7430320.1804,5540856.7043);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Miejskie Centrum Opieki','153, 163, 513','autobusowy',7428597.8177,5541936.4546);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Teligi','133, 153, 163, 173, 195, 244, 669','autobusowy',7428790.1775,5542736.5852);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Teligi','133, 153, 163, 173, 195, 244, 669','autobusowy',7428810.2056,5542738.8775);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Cmentarz Prokocim','143','autobusowy',7428856.928,5543321.0307);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Teligi','13, 3, 49, 69, 9','tramwajowy',7428848.1231,5542738.9301);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Cmentarz Prokocim','143','autobusowy',7428878.1014,5543307.1786);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Jerzmanowskiego','133, 144, 195, 204, 224, 244, 274, 301, 304, 503','autobusowy',7428900.5062,5542073.4797);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Jerzmanowskiego','133, 144, 195, 204, 224, 244, 274, 301, 304, 503','autobusowy',7428996.9587,5541967.9716);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Prokocim','133, 153, 163, 173, 195, 244, 669','autobusowy',7429163.8555,5542668.3381);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Prokocim','133, 153, 163, 173, 195, 244, 669','autobusowy',7429179.6681,5542660.7874);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Teligi','13, 3, 49, 69, 9','tramwajowy',7428902.2426,5542728.4228);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Prokocim','13, 3, 49, 69, 9','tramwajowy',7429201.3779,5542681.8581);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Prokocim','13, 3, 49, 69, 9','tramwajowy',7429282.4943,5542701.922);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Bieżanów Południe','173, 234, 244, 284, 503','autobusowy',7429447.7675,5542292.6152);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Trafo','143','autobusowy',7429502.3746,5543250.3166);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Trafo','143','autobusowy',7429577.0747,5543224.6395);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Ćwiklińskiej','133, 153, 163, 195, 234, 284, 669','autobusowy',7429687.6695,5542668.2245);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Ćwiklińskiej','13, 3, 49, 69, 9','tramwajowy',7429718.6198,5542667.1511);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Ćwiklińskiej','13, 3, 49, 69, 9','tramwajowy',7429765.1408,5542656.4185);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Ćwiklińskiej','133, 153, 163, 195, 234, 284, 669','autobusowy',7429794.8179,5542612.8696);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Szkoła','143','autobusowy',7429990.0847,5543053.0382);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Bieżanów P+R','133, 153, 163, 195, 234, 284, 669','autobusowy',7429984.2687,5542575.0175);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Cmentarz Bieżanów','153','autobusowy',7429976.91,5541995.3468);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Szkoła','143','autobusowy',7430040.6526,5543023.1224);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Cmentarz Bieżanów','153','autobusowy',7430080.9612,5542157.3953);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Szkoła','163, 195','autobusowy',7430113.3219,5542962.2172);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Bieżanów P+R','133, 153, 163, 195, 234, 284','autobusowy',7430170.5192,5542511.4069);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Duża Góra (nż)','143, 163, 195','autobusowy',7430306.9913,5542896.8457);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Ks. Łaczka (nż)','153','autobusowy',7430284.9299,5542005.3471);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Madejówka (nż)','153','autobusowy',7430346.4977,5542390.6494);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Korepty (nż)','234, 284','autobusowy',7430356.2123,5542647.2577);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Madejówka (nż)','153','autobusowy',7430354.2844,5542449.2812);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Duża Góra (nż)','143, 163, 195, 234, 284','autobusowy',7430368.4446,5542877.0252);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Korepty (nż)','163, 195, 234, 284','autobusowy',7430371.6779,5542596.3327);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Ks. Łaczka (nż)','153','autobusowy',7430498.7969,5541996.5627);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nowy Bieżanów P+R','13, 3, 49, 69, 9','tramwajowy',7429985.7061,5542613.7092);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Świdzińskiego (nż)','153','autobusowy',7430655.9098,5542033.6829);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Pomnik','143, 163, 195, 234','autobusowy',7430853.5876,5542909.1191);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Drożdżownia SKA','153','autobusowy',7430964.8894,5542146.3811);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Lipowskiego (nż)','153','autobusowy',7431001.5644,5542545.1365);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Magazynowa (nż)','195','autobusowy',7431081.1792,5543641.2383);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Magazynowa (nż)','195','autobusowy',7431098.2266,5543701.8654);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Danalówka (nż)','195','autobusowy',7431159.1918,5543945.691);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Danalówka (nż)','195','autobusowy',7431178.8878,5544022.9699);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Drożdżowa','153','autobusowy',7431227.6099,5542185.6068);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Jędrzejczyka (nż)','284','autobusowy',7431338.008,5542516.2317);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Jędrzejczyka (nż)','153, 284','autobusowy',7431347.4556,5542509.5477);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Agatowa (nż)','163, 195','autobusowy',7431397.663,5543295.791);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Agatowa (nż)','163, 195','autobusowy',7431432.8916,5543282.1029);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Weigla','153, 284','autobusowy',7431418.3209,5542300.4059);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Złocieniowa','143, 234','autobusowy',7431957.6639,5542668.6189);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Domagały (nż)','125, 163, 605','autobusowy',7432018.1359,5544519.0449);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Domagały Magazyny (nż)','125, 163, 605','autobusowy',7432036.9788,5543976.8622);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Domagały Magazyny (nż)','125, 163, 605','autobusowy',7432061.1754,5544076.6679);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Potrzask','284','autobusowy',7432115.215,5541752.4836);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Jasieńskiego (nż)','143','autobusowy',7432437.8274,5542760.2083);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Granica Miasta','234','autobusowy',7432934.4938,5541926.8208);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Granica Miasta','234','autobusowy',7432991.7858,5542048.4633);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Kokotów SKA','143','autobusowy',7433227.9378,5542786.9005);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Nad Drwiną','125','autobusowy',7432430.7479,5544448.861);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Domagały (nż)','125','autobusowy',7432159.5657,5544501.3446);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Domagały (nż)','125, 163, 605','autobusowy',7432069.7234,5544468.1114);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Pomnik','143, 163, 195, 234, 284','autobusowy',7430713.9566,5542897.1295);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Pomnik','284','autobusowy',7430832.4825,5542873.2396);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Sucharskiego (nż)','143, 234','autobusowy',7431489.635,5542843.5505);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Sucharskiego (nż)','143, 234','autobusowy',7431400.9555,5542903.6404);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Jasieńskiego (nż)','143','autobusowy',7432432.3407,5542740.0325);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Potrzask','153, 284','autobusowy',7432115.1755,5541749.3694);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Pruszyńskiego','153, 284','autobusowy',7431833.1129,5542377.3172);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Pruszyńskiego','284','autobusowy',7431834.5557,5542372.4045);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Kaim','153','autobusowy',7431549.5975,5541758.231);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Złocień','125, 605','autobusowy',7432011.771,5543283.6241);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Złocień','125, 163, 605','autobusowy',7432007.7607,5543396.8022);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Złocień','163, 195','autobusowy',7431937.8059,5543334.0634);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Dwór Czeczów','153, 284','autobusowy',7431239.0946,5542561.1047);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Ślósarczyka','153','autobusowy',7431314.9036,5541927.0866);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bazarowa','125, 163, 195, 605','autobusowy',7431391.1606,5544623.1492);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Bieżanów Drożdżownia SKA','153','autobusowy',7430884.56,5542126.2815);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (12,'Złocieniowa','143, 234','autobusowy',7432000.6499,5542644.4912);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Plac Bohaterów Getta','669','autobusowy',7425143.5353,5546136.159);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Limanowskiego','13, 72','tramwajowy',7425146.1395,5545963.812);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Plac Bohaterów Getta','17, 19, 24, 3, 69','tramwajowy',7425158.8805,5546127.0453);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Plac Bohaterów Getta','17, 19, 24, 3, 69','tramwajowy',7425164.2097,5546139.3184);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Plac Bohaterów Getta','669','autobusowy',7425181.5266,5546102.1446);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Limanowskiego','13, 72','tramwajowy',7425219.6262,5545947.6562);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Most Kotlarski (nż)','605','autobusowy',7425682.0565,5546614.9948);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łutnia','221','autobusowy',7433643.5209,5545344.9399);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rybitwy Sklep (nż)','158, 221','autobusowy',7430400.269,5545490.7944);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rybitwy Sklep (nż)','158, 221','autobusowy',7430427.6802,5545499.782);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Przewóz','158, 221','autobusowy',7432768.3564,5545491.9003);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Przewóz','158, 221','autobusowy',7432901.9767,5545498.9004);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rybitwy Dom Kultury','158, 221','autobusowy',7430889.7595,5545611.5971);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rybitwy Dom Kultury','158, 221','autobusowy',7430928.8543,5545632.3388);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Ks.Targosza (nż)','158, 221','autobusowy',7432183.5636,5545603.9498);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Ks.Targosza (nż)','158, 221','autobusowy',7432129.5784,5545611.8644);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Szparagowa','123, 163','autobusowy',7431614.9393,5545662.1298);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Husarska (nż)','158','autobusowy',7433076.7656,5545698.9398);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Szparagowa','123, 163','autobusowy',7431677.6625,5545805.7143);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Szparagowa','158, 221','autobusowy',7431615.6068,5545826.5293);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Husarska (nż)','158','autobusowy',7433119.7449,5545796.2905);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rybitwy Rozjazd (nż)','158, 221','autobusowy',7431518.4355,5545980.4998);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rybitwy Rozjazd (nż)','158, 221','autobusowy',7431517.9783,5545983.9539);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Wrobela','158','autobusowy',7433090.5329,5546106.8933);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Wrobela','158','autobusowy',7433132.5322,5546126.0573);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podwierzbie','158','autobusowy',7432676.152,5546140.6771);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łutnia','221','autobusowy',7433622.5888,5545338.0803);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Szparagowa','158, 221','autobusowy',7431646.4286,5545670.9603);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','196, 496, 608, 915','autobusowy',7423788.0983,5544163.3045);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','608','autobusowy',7423839.6215,5544238.8824);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','106, 133, 135, 136, 178, 196, 433, 496, 578','autobusowy',7423764.7386,5544243.9525);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','11, 17, 22','tramwajowy',7423730.0645,5544264.6919);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','106, 133, 135, 136, 178, 196, 433, 496, 915','autobusowy',7423795.4358,5544316.378);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Borsucza','106, 136, 578','autobusowy',7423285.6467,5544345.3479);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Borsucza','106, 136, 578','autobusowy',7423209.1499,5544357.6795);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Brożka (nż)','11, 17, 22','tramwajowy',7423475.0129,5544358.6573);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','10, 17, 19, 8','tramwajowy',7423846.0379,5544352.4787);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzemieślnicza','608','autobusowy',7423942.1354,5544600.0687);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzemieślnicza','608','autobusowy',7423976.9195,5544647.7419);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzemieślnicza','10, 17, 19, 8','tramwajowy',7423968.8053,5544702.0311);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rondo Matecznego','144, 164, 169, 173, 179, 301, 304, 469, 503, 513, 610, 904','autobusowy',7424165.5445,5544948.6418);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rondo Matecznego','904','autobusowy',7424145.1329,5545050.382);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rondo Matecznego','608','autobusowy',7424062.6086,5545071.575);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rondo Matecznego','144, 164, 169, 173, 179, 301, 304, 503, 513, 608, 610','autobusowy',7424065.3293,5545106.7996);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rondo Matecznego','10, 17, 19, 8','tramwajowy',7424124.3264,5545068.5865);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzemieślnicza','10, 17, 19, 8','tramwajowy',7423945.6446,5544625.1592);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Borsucza','11, 17, 22','tramwajowy',7423236.0288,5544363.1899);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Borsucza','11, 17, 22','tramwajowy',7423276.4369,5544367.7279);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Brożka (nż)','11, 17, 22','tramwajowy',7423464.7536,5544362.8086);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'PT','','tramwajowy',7423635.8671,5544493.187);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','10, 17, 19, 8','tramwajowy',7423839.6475,5544351.5684);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','','tramwajowy',7423724.278,5544276.0095);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','11, 17, 22','tramwajowy',7423765.1653,5544243.7239);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łagiewniki','133, 135, 178, 433, 578','autobusowy',7423876.8199,5544168.8285);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rondo Matecznego','10, 17, 19, 8','tramwajowy',7424091.7538,5544954.2482);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Bonarka SKA','178','autobusowy',7424385.3174,5544285.6579);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Bonarka SKA','178','autobusowy',7424431.4786,5544220.5984);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Makowa','144, 155, 169, 173, 904','autobusowy',7425911.1158,5543974.5551);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Makowa','144, 155, 169, 173, 469, 904','autobusowy',7425963.8647,5543943.9024);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Malborska','155, 169, 469','autobusowy',7426416.9427,5543862.9064);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Malborska','144, 155, 169, 173, 904','autobusowy',7426432.3842,5543875.8205);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Malborska','144, 173, 904','autobusowy',7426547.4411,5543821.1805);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kabel','143, 274, 669','autobusowy',7426643.9331,5543964.9136);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kabel','143, 274, 669','autobusowy',7426646.3003,5543980.7883);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kabel','11, 13, 24, 3, 49, 50, 69, 9','tramwajowy',7426671.9734,5543950.736);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kamieńskiego Wiadukt (nż)','144, 155, 169, 173, 174, 179, 469, 904','autobusowy',7424722.2542,5544403.0527);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Bonarka','144, 155, 169, 173, 174, 179','autobusowy',7425014.6611,5544263.3494);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kamieńskiego','144, 155, 169, 173, 174, 179, 301, 304, 469, 513, 904','autobusowy',7425278.1711,5544152.0979);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kamieńskiego','144, 155, 169, 173, 174, 179, 301, 304, 513, 904','autobusowy',7425304.9389,5544170.3015);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kamieńskiego Wiadukt (nż)','144, 155, 164, 169, 173, 174, 179, 610, 904','autobusowy',7424657.2741,5544510.868);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Bazarowa','125, 163, 195, 605','autobusowy',7431383.4782,5544683.4267);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Dworzec Płaszów Estakada','11, 49, 50, 72, 9','tramwajowy',7426708.6243,5544644.2535);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Dworzec Płaszów Estakada','11, 49, 50, 72, 9','tramwajowy',7426726.6678,5544653.7956);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Bagry','127','autobusowy',7428021.2417,5544694.6384);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Zajezdnia Płaszów','123, 158, 605','autobusowy',7429198.7746,5544810.8681);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Korona','10, 17, 19, 8','tramwajowy',7424556.5175,5545801.6698);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Korona','13, 17, 19, 72','tramwajowy',7424615.5205,5545850.6742);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Korona','10, 13, 72, 8','tramwajowy',7424564.1358,5545849.1732);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Smolki','10, 17, 19, 8','tramwajowy',7424297.9369,5545570.8259);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Smolki','10, 17, 19, 8','tramwajowy',7424308.3886,5545585.473);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Smolki','904','autobusowy',7424311.2829,5545582.4286);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Smolki','904','autobusowy',7424310.8581,5545562.5226);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Korona','904','autobusowy',7424549.7275,5545787.5268);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Korona','904','autobusowy',7424558.4237,5545855.5944);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podgórze SKA','13, 24, 3, 69, 72','tramwajowy',7425560.3053,5545657.9117);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podgórze SKA','143, 274, 669','autobusowy',7425586.0284,5545591.2553);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podgórze SKA','669','autobusowy',7425600.8014,5545597.5018);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podgórze SKA','13, 24, 3, 69, 72','tramwajowy',7425609.6619,5545590.7043);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podgórze SKA','155, 174, 178, 578','autobusowy',7425673.3435,5545657.3422);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podgórze SKA','127, 158, 174, 178, 578','autobusowy',7425690.6394,5545592.4719);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Podgórze SKA','127, 143, 155, 158, 274','autobusowy',7425733.7128,5545629.9181);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Cmentarz Podgórski','143, 669','autobusowy',7425757.1045,5545338.1462);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Zabłocie','20, 49, 50, 9','tramwajowy',7425822.0722,5546490.0212);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Cmentarz Podgórski','13, 24, 3, 69, 72','tramwajowy',7425828.957,5545270.5178);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Cmentarz Podgórski','143, 669','autobusowy',7425852.166,5545223.6983);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Cmentarz Podgórski','13, 24, 3, 69, 72','tramwajowy',7425855.0651,5545236.4507);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Zabłocie','20, 49, 50, 9','tramwajowy',7425888.4298,5546461.1807);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Klimeckiego','20, 49, 50, 9','tramwajowy',7426060.982,5546378.2566);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Klimeckiego','20, 49, 50, 9','tramwajowy',7426064.481,5546382.6579);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Klimeckiego','605','autobusowy',7426074.8802,5546393.9719);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Klimeckiego','605','autobusowy',7426116.1725,5546313.4205);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Dworcowa','143, 274, 669','autobusowy',7426216.0482,5544662.1416);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Dworcowa','13, 24, 3, 69, 72','tramwajowy',7426232.0347,5544647.1266);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Dworcowa','143, 274, 669','autobusowy',7426266.4149,5544547.3166);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Dworcowa','13, 24, 3, 69, 72','tramwajowy',7426287.0328,5544561.6051);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kuklińskiego','127, 158, 174, 178','autobusowy',7426379.639,5545928.9066);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kuklińskiego','605','autobusowy',7426460.0769,5545876.1859);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kuklińskiego','605','autobusowy',7426463.3698,5545995.9453);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kuklińskiego','20, 49, 50, 9','tramwajowy',7426482.1625,5545877.7736);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kuklińskiego','20, 49, 50, 9','tramwajowy',7426486.0287,5545882.8375);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kuklińskiego','127','autobusowy',7426543.8236,5545907.8516);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Kuklińskiego','127, 158, 174, 178','autobusowy',7426564.7946,5545969.1904);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Strycharska','127','autobusowy',7426699.1935,5545745.2037);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Gromadzka','605','autobusowy',7426722.2243,5545428.5245);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Gromadzka','605','autobusowy',7426724.6501,5545459.1933);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Płaszów Szkoła','127','autobusowy',7427778.5067,5545046.5279);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Łanowa','127','autobusowy',7427790.0516,5545328.8067);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzebika','125, 127, 128, 148, 158, 605','autobusowy',7427851.5845,5545386.711);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Os. Przewóz','148','autobusowy',7427870.4995,5545663.3288);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Os. Przewóz','148','autobusowy',7427896.3531,5545721.2695);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lasówka (nż)','148','autobusowy',7428111.9185,5546410.0512);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lasówka (nż)','148','autobusowy',7428125.1444,5546381.5078);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Myśliwska','148','autobusowy',7428126.9977,5545927.4074);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Motyla','127','autobusowy',7428104.8678,5545020.8893);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Węglarska','127','autobusowy',7428135.3192,5545325.2734);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Motyla','127','autobusowy',7428157.8182,5545069.2346);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Myśliwska','148','autobusowy',7428220.5186,5545908.9105);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Mały Płaszów P+R','125, 128, 148, 158, 605','autobusowy',7428333.427,5545342.6408);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Mały Płaszów P+R','123, 125, 128, 148, 158, 195, 221, 264, 605','autobusowy',7428415.2248,5545298.4973);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Mały Płaszów P+R','123, 195, 221, 264','autobusowy',7428433.806,5545370.1088);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Surzyckiego','123, 125, 128, 148, 158, 195, 221, 264, 605','autobusowy',7428629.8416,5545296.7445);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Surzyckiego','123, 128, 148, 158, 605','autobusowy',7428668.9134,5545223.4741);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Surzyckiego','123, 125, 195, 221, 264','autobusowy',7428753.654,5545233.2471);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Płk. Dąbka','123, 128, 148, 158, 605','autobusowy',7428817.8713,5544949.5147);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Płk. Dąbka','123, 128, 148, 158, 605','autobusowy',7428868.8148,5544917.3574);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Zajezdnia Płaszów','123, 128, 148, 158, 605','autobusowy',7429194.9746,5544843.1773);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Biskupińska (nż)','123, 158, 605','autobusowy',7429334.029,5544918.0944);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Biskupińska (nż)','123, 158, 605','autobusowy',7429334.4006,5544924.5413);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Albatrosów','123, 125, 195, 221, 264','autobusowy',7429645.4377,5545105.8785);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Albatrosów','123, 158, 605','autobusowy',7429672.9143,5545037.7738);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Albatrosów','123, 125, 158, 195, 221, 264, 605','autobusowy',7429769.1035,5545057.3127);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Mały Płaszów P+R','11, 20, 72','tramwajowy',7428477.2929,5545354.0655);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzebika','11, 20, 72','tramwajowy',7427843.7825,5545403.1682);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Śliwiaka (nż)','264','autobusowy',7432573.4305,5545036.837);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Botewa','123, 125, 195, 264, 605','autobusowy',7430385.7914,5545099.0936);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Botewa','123, 125, 158, 195, 221, 264, 605','autobusowy',7430245.9452,5545115.8195);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Śliwiaka Zakłady','264','autobusowy',7432192.7259,5545071.6785);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Półłanki','264','autobusowy',7431476.0877,5545111.9483);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Botewa','158, 221','autobusowy',7430289.7197,5545148.8431);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Śliwiaka Zakłady','264','autobusowy',7432084.2543,5545105.3119);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Półłanki','123, 125, 195, 264, 605','autobusowy',7431364.2391,5545161.2128);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Półłanki','123, 163','autobusowy',7431452.9285,5545211.2455);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Półłanki','125, 163, 195, 605','autobusowy',7431404.329,5545086.1703);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Śliwiaka (nż)','264','autobusowy',7432627.6193,5545016.1323);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Płaszowska','127','autobusowy',7426815.6575,5545922.0377);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Płaszowska','127','autobusowy',7426876.3542,5545960.3643);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Stoczniowców','158, 174, 178','autobusowy',7427023.918,5546338.4542);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Stoczniowców','125, 128','autobusowy',7427039.4344,5546425.7878);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Stoczniowców','125, 128, 158','autobusowy',7427108.3419,5546304.9333);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lipska','605','autobusowy',7427119.5354,5545459.2538);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Saska','127','autobusowy',7427146.1943,5545954.6826);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Stoczniowców','174, 178','autobusowy',7427201.0493,5546448.5046);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lipska','125, 605','autobusowy',7427186.002,5545510.7428);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Saska','125, 605','autobusowy',7427200.5238,5545851.6037);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Saska','125, 128, 158','autobusowy',7427210.0769,5545985.1829);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lipska','125','autobusowy',7427228.096,5545424.1829);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Saska','127, 128, 158, 605','autobusowy',7427253.0018,5545917.856);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Koszykarska','174, 178','autobusowy',7427593.9332,5546745.5221);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Szczecińska','127, 128, 158, 605','autobusowy',7427642.1901,5545668.6346);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Koszykarska','148, 174, 178','autobusowy',7427673.8939,5546763.5739);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Koszykarska','148','autobusowy',7427684.406,5546645.7411);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzebika','125','autobusowy',7427719.5279,5545432.8765);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Szczecińska','127, 128, 158, 605','autobusowy',7427729.9739,5545617.6139);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Gromadzka','20, 49, 50, 9','tramwajowy',7426801.5954,5545438.4514);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Gromadzka','20, 49, 50, 9','tramwajowy',7426800.5072,5545442.6933);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lipska','11, 20, 72','tramwajowy',7427254.8897,5545434.7202);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lipska','20, 49, 50, 9','tramwajowy',7427058.4142,5545442.6217);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Lipska','11, 49, 50, 72, 9','tramwajowy',7427151.3047,5545330.0068);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (13,'Rzebika','11, 20, 72','tramwajowy',7427716.8182,5545417.8958);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'TAURON Arena Kraków al. Pokoju','128, 662','autobusowy',7427473.809,5548033.7393);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'TAURON Arena Kraków','128','autobusowy',7427595.4678,5548351.1249);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'TAURON Arena Kraków','128','autobusowy',7427606.2742,5548477.68);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Dąbrowskiej','142, 152, 442, 611','autobusowy',7429456.6707,5549577.3521);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Dąbrowskiej','142, 152, 442, 611','autobusowy',7429492.3456,5549573.8781);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Muzeum Lotnictwa Polskiego','10, 4, 5, 52, 64, 75, 9','tramwajowy',7427737.7843,5549085.6034);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Muzeum Lotnictwa Polskiego','10, 4, 5, 52, 64, 75, 9','tramwajowy',7427722.2087,5549087.9275);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Cogiteon (nż)','159, 172, 608','autobusowy',7427474.8627,5550518.2561);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Lasek Łęgowski (nż)','103','autobusowy',7431099.6113,5546709.9171);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Odmętowa','103','autobusowy',7430911.4507,5546875.6393);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Odmętowa','103','autobusowy',7430884.002,5546951.8576);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Lasek Łęgowski (nż)','103','autobusowy',7431082.7872,5546699.3437);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo Czyżyńskie','103, 113, 148, 174, 413, 603, 662','autobusowy',7429609.6361,5548934.8257);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sołtysowska Osiedle','103, 113, 413, 603','autobusowy',7429726.1184,5548041.1636);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sołtysowska Osiedle','103, 113, 413, 603','autobusowy',7429766.1461,5548024.8421);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Archiwum UMK (nż)','113','autobusowy',7429887.7094,5547427.5682);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Archiwum UMK (nż)','113','autobusowy',7429931.0505,5547412.317);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sikorki','103, 113, 413, 603','autobusowy',7429993.8439,5547898.4945);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sikorki','103, 113, 413, 603','autobusowy',7430031.061,5547853.29);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Na Załęczu','103, 113, 413, 603','autobusowy',7430123.2199,5547623.0467);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Na Załęczu','113','autobusowy',7430121.0585,5547512.3933);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Na Załęczu','103','autobusowy',7430193.8734,5547516.7821);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Habina (nż)','103','autobusowy',7430559.3491,5547315.803);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Habina (nż)','103','autobusowy',7430608.6082,5547265.2182);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Isep (nż)','113','autobusowy',7429902.5658,5546970.8534);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Isep (nż)','113','autobusowy',7429913.185,5546950.4691);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Wiklinowa (nż)','113','autobusowy',7430146.6244,5547068.1095);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Wiklinowa (nż)','113','autobusowy',7430192.913,5547091.8665);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Elektrociepłownia','113','autobusowy',7428676.5705,5546588.3758);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Szafrańska','113','autobusowy',7429025.5448,5546492.5211);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Szafrańska','113','autobusowy',7429075.4307,5546484.2956);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stręcka (nż)','113','autobusowy',7429431.2688,5546587.4926);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stręcka (nż)','113','autobusowy',7429440.2819,5546592.0457);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Arctowskiego','148, 174, 178','autobusowy',7428411.4103,5547166.2406);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Arctowskiego','148','autobusowy',7428491.6267,5547166.614);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Arctowskiego','174, 178','autobusowy',7428522.5674,5547247.1822);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Galicyjska','148','autobusowy',7428862.2468,5547355.2286);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Galicyjska','148','autobusowy',7428941.8213,5547415.3522);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Siwka (nż)','113','autobusowy',7429443.837,5547252.7527);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Siwka (nż)','113','autobusowy',7429462.8305,5547210.4542);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo Czyżyńskie','10, 4, 5, 52, 64, 75, 9','tramwajowy',7429569.4344,5549067.8398);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Ogród Doświadczeń','662','autobusowy',7428140.6082,5548199.274);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Ogród Doświadczeń','662','autobusowy',7428140.8013,5548165.6773);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'AWF / PK','664','autobusowy',7428243.7136,5549132.8527);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'AWF / PK','664','autobusowy',7428296.9335,5549113.5619);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stella-Sawickiego','178, 578','autobusowy',7428663.4256,5549087.9698);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stella-Sawickiego','129, 442','autobusowy',7428676.4071,5549406.3845);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stella-Sawickiego','129, 178, 442, 578','autobusowy',7428685.1134,5549221.8345);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Centralna','174, 178, 578','autobusowy',7428659.5158,5547909.1146);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Centralna','174, 178, 578','autobusowy',7428693.8105,5548026.904);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stella-Sawickiego','664','autobusowy',7428792.9383,5549136.6348);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stella-Sawickiego','664','autobusowy',7428811.974,5549179.097);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Medweckiego','129, 442','autobusowy',7428946.5605,5549378.204);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Medweckiego','129, 442','autobusowy',7428949.6384,5549351.2433);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'ZDMK','148','autobusowy',7428988.1851,5547984.0546);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'ZDMK','148','autobusowy',7429034.8553,5547971.9777);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sołtysowska (nż)','148','autobusowy',7429143.7006,5548166.8706);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Czyżyny','664','autobusowy',7429224.8587,5549137.6862);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sołtysowska (nż)','103, 113, 148, 413, 603','autobusowy',7429216.8905,5548232.6446);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sołtysowska (nż)','103, 113, 413, 603','autobusowy',7429231.8017,5548169.0414);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Czyżyny','664','autobusowy',7429313.425,5549095.0228);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Gałczyńskiego','103, 113, 148, 413, 603','autobusowy',7429308.6515,5548538.8938);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Gałczyńskiego','174, 662','autobusowy',7429316.0304,5548625.896);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Gałczyńskiego','103, 113, 148, 174, 413, 603, 662','autobusowy',7429356.1027,5548597.112);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sołtysowska Zakłady','103, 113, 413, 603','autobusowy',7429425.8607,5548023.5364);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Sołtysowska Zakłady','103, 113, 413, 603','autobusowy',7429461.7851,5548011.0488);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo 308. Dywizjonu','178, 578','autobusowy',7428739.4289,5548430.4258);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo 308. Dywizjonu','178, 578','autobusowy',7428706.3052,5548480.8134);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo 308. Dywizjonu','174, 662','autobusowy',7428827.5761,5548366.4024);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo 308. Dywizjonu','174, 662','autobusowy',7428912.9198,5548441.4658);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Czyżyny Dworzec','113, 129, 142, 148, 152, 202, 212, 222, 232, 262, 442, 603, 611, 701','autobusowy',7429515.2356,5549214.165);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Ogród Doświadczeń','1, 14, 22, 62','tramwajowy',7428144.6842,5548188.2066);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stella-Sawickiego','10, 4, 5, 52, 64, 75, 9','tramwajowy',7428749.4945,5549159.0163);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Czyżyny','10, 4, 5, 52, 64, 75, 9','tramwajowy',7429227.3888,5549123.303);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'AWF / PK','10, 4, 5, 52, 64, 75, 9','tramwajowy',7428326.3999,5549132.7449);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Gałczyńskiego','1, 14, 22, 62','tramwajowy',7429286.0546,5548584.3553);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Gałczyńskiego','1, 14, 22, 62','tramwajowy',7429325.8171,5548607.9685);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Stella-Sawickiego','10, 4, 5, 52, 64, 75, 9','tramwajowy',7428760.6893,5549155.6412);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Czyżyny','10, 4, 5, 52, 64, 75, 9','tramwajowy',7429240.7033,5549117.7873);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo 308. Dywizjonu','1, 14, 22, 62','tramwajowy',7428795.6787,5548385.2925);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'AWF / PK','10, 4, 5, 52, 64, 75, 9','tramwajowy',7428335.2756,5549127.2865);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Ogród Doświadczeń','1, 14, 22, 62','tramwajowy',7428228.2487,5548204.438);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Rondo 308. Dywizjonu','1, 14, 22, 62','tramwajowy',7428795.3888,5548390.4133);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'TAURON Arena Kraków al. Pokoju','1, 14, 22, 62','tramwajowy',7427616.8003,5548049.1558);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'TAURON Arena Kraków al. Pokoju','128','autobusowy',7427645.9201,5548121.5122);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'TAURON Arena Kraków al. Pokoju','662','autobusowy',7427697.8848,5548045.8344);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'TAURON Arena Kraków al. Pokoju','1, 14, 22, 62','tramwajowy',7427695.8235,5548073.4495);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Os. Akademickie PK','129, 138, 152, 159, 172, 189, 442, 608, 611','autobusowy',7428086.5338,5550609.4395);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Os. Dywizjonu 303','129, 178, 442','autobusowy',7428407.9571,5550272.5195);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Wiślicka','129, 138, 152, 159, 172, 189, 442, 501, 502, 511, 572, 608, 611','autobusowy',7428486.5143,5550665.9218);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Os. Dywizjonu 303','129, 178, 442','autobusowy',7428479.6497,5550334.7436);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Wiślicka','129, 178, 442, 578','autobusowy',7428535.3295,5550591.2949);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (14,'Wiślicka','123, 138, 152, 172, 189, 501, 502, 511, 572, 608, 611','autobusowy',7428588.6042,5550641.4191);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kupały','138','autobusowy',7429696.1706,5551491.0601);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Złotego Wieku','123, 132, 139, 178, 182, 198, 601','autobusowy',7428746.747,5551342.4507);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Złotego Wieku','14','tramwajowy',7428759.9297,5551322.1406);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Cedyńska','123, 159, 178','autobusowy',7428751.0002,5550931.4768);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Złotego Wieku','123, 132, 139, 178, 182, 198, 601','autobusowy',7428782.3852,5551347.8713);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Łęczycka','123, 159, 178, 578','autobusowy',7428900.4763,5551219.9311);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Łęczycka','123, 159, 178, 578','autobusowy',7428911.4047,5551229.1298);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Rondo Piastowskie','132, 139, 159, 182, 198, 601','autobusowy',7429223.3213,5551394.7401);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Rondo Piastowskie','14','tramwajowy',7429253.6755,5551384.8828);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Rondo Piastowskie','132, 139, 159, 182, 198, 601','autobusowy',7429253.2032,5551365.4223);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Złotego Wieku','14','tramwajowy',7428770.1828,5551312.8823);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Rondo Piastowskie','14','tramwajowy',7429259.4459,5551382.9154);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Zalew Zesławice (nż)','198','autobusowy',7430832.5654,5552461.6891);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Zalew Zesławice (nż)','198','autobusowy',7430832.4099,5552449.6774);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Cogiteon (nż)','159, 172, 608','autobusowy',7427442.7632,5550568.4159);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Oświecenia','129, 132, 138, 139, 152, 182, 189, 442, 482, 601, 611','autobusowy',7427542.9824,5550854.8331);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Marchołta','132, 139, 182, 482, 601','autobusowy',7427572.2779,5551210.4029);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Marchołta','132, 139, 182, 482, 601','autobusowy',7427582.6917,5551281.7889);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Oświecenia','132, 139, 182, 482, 601','autobusowy',7427625.8411,5550869.3952);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kurzei','132, 139, 182, 482, 601','autobusowy',7427652.2317,5551497.0968);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kurzei','132, 139, 182, 482, 601','autobusowy',7427736.7463,5551497.288);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Oświecenia','129, 138, 152, 189, 442, 611','autobusowy',7427625.815,5550788.1907);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Dziekanowicka (nż)','105, 193, 260, 270','autobusowy',7427861.021,5552444.0382);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Dziekanowicka (nż)','105, 193, 260, 270','autobusowy',7427910.3305,5552492.7629);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Marycjusza','198','autobusowy',7430255.4048,5551825.6785);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Marycjusza','198','autobusowy',7430277.2548,5551800.2534);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Popielidów','159, 193','autobusowy',7429722.3867,5551928.2172);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kruszwicka','159, 193','autobusowy',7429830.0803,5551721.6775);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Popielidów','159, 193','autobusowy',7429867.5309,5551941.7721);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kruszwicka','159, 193','autobusowy',7429889.8583,5551751.1497);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Akademickie PK','129, 138, 152, 189, 442, 611','autobusowy',7428027.6827,5550655.8398);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Mistrzejowice','132, 139, 182, 482, 601','autobusowy',7428002.2739,5551537.5321);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Mistrzejowice','132, 139, 182, 482, 601','autobusowy',7428068.4563,5551526.1842);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Mistrzejowice','123, 178, 198, 482, 578','autobusowy',7428182.9052,5551570.6978);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kleeberga','664','autobusowy',7429366.6135,5551548.4672);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kleeberga','159, 182, 193, 198, 664','autobusowy',7429375.3068,5551529.4417);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Piasta Kołodzieja','14, 21, 52, 64','tramwajowy',7429390.7139,5551845.1566);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Piasta Kołodzieja','664','autobusowy',7429393.1596,5551781.1619);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Piasta Kołodzieja','159, 193, 664','autobusowy',7429412.9001,5551856.321);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Piasta Kołodzieja','159, 193','autobusowy',7429434.1328,5551795.3041);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kleeberga','159, 182, 193, 198','autobusowy',7429471.3313,5551583.1254);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Piasta Kołodzieja','14, 21, 52, 64','tramwajowy',7429387.377,5551771.338);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kleeberga','14, 21, 52, 64','tramwajowy',7429362.5129,5551541.4022);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Kleeberga','14, 21, 52, 64','tramwajowy',7429357.0984,5551537.8029);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Miśnieńska','123, 132, 139, 178, 182, 198, 578, 601','autobusowy',7428460.4936,5551422.0293);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Miśnieńska','123, 132, 139, 178, 182, 198, 578, 601','autobusowy',7428492.0226,5551398.4695);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Wiślicka','123, 159, 178, 578','autobusowy',7428550.1244,5550712.9039);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Miśnieńska','14','tramwajowy',7428461.9055,5551399.2063);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Powstańców Magazyny (nż)','105, 193, 260, 270','autobusowy',7428583.2079,5552705.7583);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Powstańców Magazyny (nż)','105, 193, 260, 270','autobusowy',7428585.2922,5552722.5276);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Urząd Skarbowy Nowa Huta','105, 193','autobusowy',7429339.6365,5552522.2762);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Powstańców Wiadukt','105, 193','autobusowy',7429345.2225,5552684.9451);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Piastów','105','autobusowy',7429373.7581,5552235.0507);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Piastów','159, 193, 664','autobusowy',7429386.9344,5552111.4013);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Piastów','193','autobusowy',7429404.0497,5552080.0282);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Powstańców Wiadukt','105, 193, 260, 270','autobusowy',7429288.576,5552761.7823);
+INSERT INTO PRZYSTANKI (id_dzielnica, nazwa, linie, rodzaj, dl_geograficzna,szer_geograficzna) VALUES (15,'Os. Piastów','14, 21, 52, 64','tramwajowy',7429324.7506,5552229.9145);
+
+
+
+
+
+-- Analiza liczby zameldowanych osób w poszczególnych dzielnicach 
+SELECT nazwa, liczba_zameldowanych FROM dzielnice ORDER BY liczba_zameldowanych DESC;
+-- Analiza powierzchni dzielnic
+SELECT nazwa, ROUND(powierzchnia/10000, 2) AS powierzchnia_ha FROM dzielnice ORDER BY powierzchnia DESC;
+-- Znalezienie dzielnicy o największej powierzchni
+SELECT nazwa, powierzchnia FROM dzielnice ORDER BY powierzchnia DESC LIMIT 3;
+-- Znalezienie dzielnicy o najmniejszej liczbie zameldowanych osób
+SELECT nazwa, powierzchnia FROM dzielnice ORDER BY liczba_zameldowanych ASC LIMIT 3;
+-- Porównanie liczby zameldowanych osób do powierzchni dzielnicy
+SELECT nazwa, ROUND(liczba_zameldowanych / (powierzchnia / 10000), 2) AS gestosc_zaludnienia FROM dzielnice ORDER BY gestosc_zaludnienia  DESC;
+-- "C:\ms4w\Apache\htdocs\data\maps\krakow.map.txt"
+
+CREATE view 
+dzielnice_placówki AS
+SELECT dzielnice.nazwa, COUNT(*) AS "ilość placówek" FROM dostepnosc_placowki JOIN dzielnice ON dzielnice.id_dzielnica = dostepnosc_placowki.id_dzielnica
+GROUP BY dzielnice.nazwa ORDER BY COUNT(*) DESC;
+
+CREATE VIEW
+dzielnice_przystanki AS
+SELECT dzielnice.nazwa, COUNT(*) AS "ilość przystanków" FROM przystanki JOIN dzielnice ON dzielnice.id_dzielnica = przystanki.id_dzielnica
+GROUP BY dzielnice.nazwa ORDER BY COUNT(*) DESC;
+
+CREATE VIEW
+dzielnice_przystanki_rodzaj AS
+SELECT dzielnice.nazwa, przystanki.rodzaj, COUNT(*) AS "ilość przystanków" FROM przystanki JOIN dzielnice ON dzielnice.id_dzielnica = przystanki.id_dzielnica
+GROUP BY dzielnice.nazwa, przystanki.rodzaj ORDER BY dzielnice.nazwa;
+
+
+ALTER TABLE demografia
+RENAME COLUMN do TO do_;
+
+CREATE VIEW
+piramida_wieku AS
+SELECT dzielnice.nazwa, demografia.od, demografia.do_, demografia.plec, demografia.ilosc FROM demografia JOIN dzielnice ON dzielnice.id_dzielnica = demografia.id_dzielnica ORDER BY dzielnice.id_dzielnica, demografia.od, demografia.plec;
+ 
+CREATE VIEW
+piramida_wieku_razem AS
+SELECT dzielnice.nazwa, demografia.od, demografia.do_, demografia.plec, demografia.ilosc FROM demografia JOIN dzielnice ON dzielnice.id_dzielnica = demografia.id_dzielnica WHERE demografia.plec = 'r' ORDER BY dzielnice.id_dzielnica, demografia.od, demografia.plec;
+
+CREATE VIEW
+ludnosc_w_dzielnicach AS
+SELECT dzielnice.nazwa, SUM(demografia.ilosc) AS ilosc FROM demografia JOIN dzielnice ON dzielnice.id_dzielnica = demografia.id_dzielnica WHERE demografia.plec = 'r' GROUP BY dzielnice.nazwa ORDER BY SUM(demografia.ilosc) DESC;
+
+-- procent z przedziału wiekowego w dzielnicach
+CREATE VIEW
+procent_wiek_w_dzielnicach AS
+SELECT AS1.nazwa, AS1.od, AS1.do_, AS1.ilosc, 100 * AS1.ilosc/ludnosc_w_dzielnicach.ilosc AS procent FROM 
+(SELECT dzielnice.id_dzielnica, dzielnice.nazwa, demografia.od, demografia.do_,SUM(demografia.ilosc ) AS ilosc FROM dzielnice JOIN demografia ON dzielnice.id_dzielnica = demografia.id_dzielnica WHERE demografia.plec = 'r' GROUP BY dzielnice.id_dzielnica, demografia.od, demografia.do_)
+AS AS1
+JOIN 
+ludnosc_w_dzielnicach ON ludnosc_w_dzielnicach.nazwa = AS1.nazwa ORDER BY AS1.id_dzielnica, AS1.od;
+
+select * from  zabudowa;
+CREATE VIEW 
+zabudowa_dzielnice AS
+select dzielnice.nazwa, zabudowa.typ_index, COUNT(*) AS ilość, sum(bud_powierzchnia_ha) AS powierzchnia FROM zabudowa JOIN dzielnice ON dzielnice.id_dzielnica = zabudowa.id_dzielnica GROUP BY dzielnice.nazwa, zabudowa.typ_index
+-- procent powierzchni obliczyć -- 
+
+select dzielnice.nazwa, SUM(bud_powierzchnia_ha), SUM(dzielnice.powierzchnia), procent(SUM(bud_powierzchnia_ha), SUM(dzielnice.powierzchnia)) AS procent_zabudowy FROM zabudowa join dzielnice ON zabudowa.id_dzielnica = dzielnice.id_dzielnica  GROUP BY dzielnice.nazwa;
+
+select * from rejestr_cen;
+
+CREATE VIEW
+średnie_ceny_miasto AS
+select rynek, avg(sr_cena_m2) as 'średnia cena za m2' FROM rejestr_cen WHERE miesiac_zakupu = (select MAX(miesiac_zakupu) FROM rejestr_cen ) AND rok_zakupu = (select MAX(rok_zakupu) FROM rejestr_cen ) GROUP BY rynek;
+
+CREATE VIEW
+średnie_ceny_dzielnic AS
+select nazwa, rynek, avg(sr_cena_m2) as 'średnia cena za m2' FROM rejestr_cen JOIN dzielnice ON dzielnice.id_dzielnica = rejestr_cen.id_dzielnica WHERE miesiac_zakupu = (select MAX(miesiac_zakupu) FROM rejestr_cen) AND rok_zakupu = (select MAX(rok_zakupu) FROM rejestr_cen )GROUP BY rynek, nazwa ORDER BY nazwa;
+
+select * FROM zielen;
+CREATE VIEW 
+tereny_zielone AS 
+select nazwa, SUM(powierzchnia_ha) FROM zielen JOIN dzielnice ON zielen.id_dzielnica = dzielnice.id_dzielnica group by nazwa ORDER BY SUM(powierzchnia_ha) DESC;
+
+CREATE VIEW
+tereny_zielone_miasto AS
+select typ, SUM(powierzchnia_ha) FROM zielen group by typ ORDER BY SUM(powierzchnia_ha) DESC;
+
+
+CREATE VIEW
+zestawienie_pow_zieleni_do_zabudowy AS
+select s1.nazwa, powierzchnia_zabudowy, powierzchnia_zielen FROM 
+(select nazwa, SUM(bud_powierzchnia_ha) AS powierzchnia_zabudowy FROM zabudowa JOIN dzielnice ON zabudowa.id_dzielnica = dzielnice.id_dzielnica GROUP BY nazwa) s1
+JOIN 
+(select nazwa, SUM(powierzchnia_ha) AS powierzchnia_zielen FROM zielen JOIN dzielnice ON zielen.id_dzielnica = dzielnice.id_dzielnica group by nazwa) s2
+ON s1.nazwa = s2.nazwa;
+
+
+DELIMITER $$
+CREATE PROCEDURE
+cena_m2 (did INT, r varchar (50))
+BEGIN
+SELECT rok_zakupu, miesiac_zakupu, sr_cena_m2 from rejestr_cen WHERE id_dzielnica = did AND rynek = r order by rok_zakupu, miesiac_zakupu;
+END$$
+DELIMITER ;
+
+CALL cena_m2 (5, 'Rynek pierwotny');
+
+
+DELIMITER $$
+CREATE PROCEDURE
+ilosc_placowek (did INT)
+BEGIN
+SELECT * FROM 
+(SELECT dzielnice.id_dzielnica, dzielnice.nazwa, COUNT(*) AS "ilość placówek" FROM dostepnosc_placowki JOIN dzielnice ON dzielnice.id_dzielnica = dostepnosc_placowki.id_dzielnica
+GROUP BY dzielnice.id_dzielnica, dzielnice.nazwa ORDER BY COUNT(*) DESC) s 
+WHERE s.id_dzielnica = did ;
+END$$
+DELIMITER ;
+
+CALL ilosc_placowek (3);
+
+
+DELIMITER $$
+CREATE PROCEDURE
+ilosc_przystanków (did INT)
+BEGIN
+SELECT * FROM
+(SELECT dzielnice.id_dzielnica, dzielnice.nazwa, COUNT(*) AS "ilość przystanków" FROM przystanki JOIN dzielnice ON dzielnice.id_dzielnica = przystanki.id_dzielnica
+GROUP BY dzielnice.id_dzielnica, dzielnice.nazwa ORDER BY COUNT(*) DESC) p
+WHERE p.id_dzielnica = did;
+END$$
+DELIMITER ;
+
+CALL ilosc_przystanków (3);
+
+DELIMITER $$
+CREATE FUNCTION
+procent (m DOUBLE , n DOUBLE)
+RETURNS DOUBLE
+DETERMINISTIC
+BEGIN
+RETURN ROUND(m *100/n, 2);
+END $$
+DELIMITER ;
+
+SELECT procent (1,3);
+--  w jakij dzielicy jest najwicej młodych osób do 34l-- 
+SELECT * FROM demografia;
+SELECT dzielnice.nazwa,  demografia.ilosc FROM dzielnice
+join demografia ON dzielnice.id_dzielnica = demografia.id_dzielnica
+WHERE plec = 'r' AND demografia.do_ < 35 ORDER BY demografia.ilosc DESC;
+-- --w których dzielnicach ile jest jaki podział liczbowy i porcentowy --
+
+CREATE VIEW 
+procent_kobiety_meżczyzni
+AS
+SELECT K.nazwa, K.kobiety, M.mezczyzni, procent(K.kobiety, K.kobiety + M.mezczyzni) AS procent_kobiet, procent(M.mezczyzni, K.kobiety + M.mezczyzni) AS procent_mężczyzn FROM
+(SELECT dzielnice.nazwa, SUM(demografia.ilosc) AS kobiety FROM dzielnice
+join demografia ON dzielnice.id_dzielnica = demografia.id_dzielnica WHERE plec = 'k' group by dzielnice.nazwa)
+AS K
+JOIN 
+(SELECT dzielnice.nazwa, SUM(demografia.ilosc) AS mezczyzni FROM dzielnice
+join demografia ON dzielnice.id_dzielnica = demografia.id_dzielnica WHERE plec = 'm' group by dzielnice.nazwa)
+AS M
+ON K.nazwa = M.nazwa;
+
+
+-- zestawnienie ile mieszkanców przypada na jedną placowke
+ CREATE VIEW 
+ilosc_mieszkancow_na_jedna_placowke
+AS
+SELECT * FROM dzielnice_placówki; 
+SELECT dzielnice_placówki.*, dzielnice.liczba_zameldowanych, liczba_zameldowanych/dzielnice_placówki.`ilość placówek` AS placówki_na_os FROM dzielnice_placówki
+JOIN dzielnice
+ON dzielnice.nazwa = dzielnice_placówki.nazwa;
+
+-- ilość terenów zielonych na 1 osobe
+ CREATE VIEW 
+powierzchnia_trenow_zielonych_na_osobe
+AS
+SELECT tereny_zielone.*, dzielnice.liczba_zameldowanych, tereny_zielone.`SUM(powierzchnia_ha)` * 10000 / liczba_zameldowanych AS zielen_na_mieszkanca_m2 FROM  tereny_zielone
+JOIN dzielnice
+ON dzielnice.nazwa = tereny_zielone.nazwa 
+GROUP BY 
+tereny_zielone.nazwa, tereny_zielone.`SUM(powierzchnia_ha)`, dzielnice.liczba_zameldowanych;
+
+ CREATE VIEW 
+powierzchnia_trenow_zabudowanych_na_osobe
+AS
+ SELECT z.nazwa, z.powierzchnia, dzielnice.liczba_zameldowanych, ROUND(z.powierzchnia*10000/dzielnice.liczba_zameldowanych, 2) AS powierzchnia_zabudowy_na_mieszkanca_m2
+ FROM
+	 (SELECT nazwa, typ_index, powierzchnia 
+	 FROM zabudowa_dzielnice
+	 WHERE typ_index IN ('m')
+	 GROUP BY nazwa) AS z
+ JOIN
+ dzielnice ON dzielnice.nazwa = z.nazwa
+ GROUP BY 
+ z.nazwa, dzielnice.liczba_zameldowanych;
+ 
+ 
+ 

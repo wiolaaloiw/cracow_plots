@@ -1,0 +1,18 @@
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (1, 'Stare Miasto', 5567646, 27283);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (2, 'Grzegórzki', 5845232, 29525);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (3, 'Prądnik Czerwony', 6437857, 44876);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (4, 'Prądnik Biały', 23418679, 72966);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (5, 'Krowodrza', 5619039, 28872);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (6, 'Bronowice', 9559587, 24480);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (7, 'Zwierzyniec', 28730964, 20176);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (8, 'Dębniki', 46188703, 65203);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (9, 'Łagiewniki-Borek Fałęcki', 5415081, 15219);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (10, 'Swoszowice', 25604010, 29062);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (11, 'Podgórze Duchackie', 9540011, 53648);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (12, 'Bieżanów-Prokocim', 18473911, 62583);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (13, 'Podgórze', 25667082, 41058);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (14, 'Czyżyny', 12256767, 34015);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (15, 'Mistrzejowice', 5590035, 50208);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (16, 'Bieńczyce', 3699023, 36540);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (17, 'Wzgórza Krzesławickie', 23815455, 19925);
+INSERT INTO districts (district_id, district_name, district_area, registered_residents)VALUES (18, 'Nowa Huta', 65409916, 46095);
